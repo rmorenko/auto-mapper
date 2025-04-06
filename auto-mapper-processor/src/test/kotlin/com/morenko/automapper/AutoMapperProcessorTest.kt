@@ -1,50 +1,80 @@
 package com.morenko.automapper
 
-
-import com.tschuchort.compiletesting.KotlinCompilation
-import com.tschuchort.compiletesting.SourceFile
-import com.tschuchort.compiletesting.symbolProcessorProviders
-import com.tschuchort.compiletesting.kspSourcesDir
-import io.kotest.core.spec.style.FeatureSpec
-import io.kotest.matchers.file.shouldExist
+import com.google.devtools.ksp.processing.CodeGenerator
+import com.google.devtools.ksp.processing.KSPLogger
+import com.google.devtools.ksp.processing.Resolver
+import com.google.devtools.ksp.symbol.KSAnnotated
+import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.google.devtools.ksp.symbol.KSFile
+import com.morenko.automapper.annotations.AutoMapper
+import com.morenko.automapper.generators.MappingFunctionGenerator
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.string.shouldContain
-import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
+import io.mockk.mockk
+import io.mockk.every
 
-@OptIn(ExperimentalCompilerApi::class)
-class AutoMapperProcessorTest : FeatureSpec({
-    //kotlin-compile-testing-ksp not support kotlin 2 compiler
-    xfeature("should generate mapping function") {
-        val source = SourceFile.kotlin(
-            "TestDto.kt", """
-            package com.example
+import java.util.*
 
-            import com.morenko.automapper.AutoMapper
+class AutoMapperProcessorTest : StringSpec({
+    val logger = mockk<KSPLogger>(relaxed = true)
 
-            @AutoMapper(TestEntity::class)
-            data class TestDto(val id: String, val name: String)
+    "mappingFunctionGenerator should not execute when AutoMapper not resolved" {
+        val codeGenerator = mockk<CodeGenerator>()
+        val resolver = mockk<Resolver>()
+        every {
+            resolver.getSymbolsWithAnnotation(AutoMapper::class.qualifiedName.orEmpty())
+        } returns emptyList<KSAnnotated>().asSequence()
 
-            data class TestEntity(val id: String, val name: String)
-            """
-        )
+        val autoMapperProcessor = AutoMapperProcessor(codeGenerator, logger)
+        autoMapperProcessor.process(resolver).shouldBeEmpty()
 
-        val compilation = KotlinCompilation().apply {
-            sources = listOf(source)
-            symbolProcessorProviders = listOf(AutoMapperProcessorProvider())
-            inheritClassPath = true
-            messageOutputStream = System.out // Для отладки
+        val ksFile = mockk<KSFile>()
+        every {
+            resolver.getSymbolsWithAnnotation(AutoMapper::class.qualifiedName.orEmpty())
+        } returns listOf<KSAnnotated>(ksFile).asSequence()
+        autoMapperProcessor.process(resolver).shouldBeEmpty()
+
+    }
+
+
+    "mappingFunctionGenerator should execute when AutoMapper annotation resolved " {
+        val codeGenerator = mockk<CodeGenerator>()
+        val resolver = mockk<Resolver>()
+        val ksClassDeclaration = mockk<KSClassDeclaration>()
+        val mappingFunctionGenerator = mockk<MappingFunctionGenerator>()
+        every {
+            ksClassDeclaration.simpleName.asString()
+        } returns AutoMapper::class.simpleName.toString()
+
+        every {
+            ksClassDeclaration.packageName.asString()
+        } returns "com.example"
+
+        val processClasses = mutableSetOf<String>()
+
+
+        every {
+            mappingFunctionGenerator.generate(ksClassDeclaration, resolver, codeGenerator,
+                any<MutableSet<String>>())
+        } answers  {
+            processClasses.add(UUID.randomUUID().toString())
         }
 
-        val result = compilation.compile()
+        every {
+            resolver.getSymbolsWithAnnotation(AutoMapper::class.qualifiedName.orEmpty())
+        } returns listOf(ksClassDeclaration).asSequence()
 
+        val autoMapperProcessor = AutoMapperProcessor(codeGenerator, logger)
+        autoMapperProcessor
+            .setPrivateField("mappingFunctionGenerator", mappingFunctionGenerator)
+        autoMapperProcessor
+            .setPrivateField("processedClasses", processClasses)
+        autoMapperProcessor.process(resolver).shouldBeEmpty()
+        processClasses.size shouldBe 1
+        autoMapperProcessor.process(resolver).shouldBeEmpty()
+        processClasses.size shouldBe 2
 
-        result.exitCode shouldBe KotlinCompilation.ExitCode.OK
-
-
-        val generatedFile = compilation.kspSourcesDir.resolve("generated/mapper/TestDto_Mapper.kt")
-        generatedFile.shouldExist()
-
-        val content = generatedFile.readText()
-        content.shouldContain("fun TestDto.mapTestDtoToTestEntity(): TestEntity")
     }
 })
+
