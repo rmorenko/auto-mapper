@@ -1,6 +1,7 @@
 plugins {
     kotlin("jvm") version "2.1.10"
     id("io.gitlab.arturbosch.detekt") version "1.23.8"
+    id("org.jetbrains.dokka") version "1.8.10" // Add Dokka plugin for KDoc generation
     `java-library`
 }
 
@@ -53,4 +54,14 @@ tasks.register<Jar>("fatJar") {
     })
 
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+// Configure Dokka for KDoc generation
+tasks.dokkaHtml.configure {
+    outputDirectory.set(layout.buildDirectory.get().asFile.resolve("dokka"))
+    dokkaSourceSets {
+        configureEach {
+            includes.from("module.md")
+        }
+    }
 }
