@@ -46,7 +46,8 @@ class MappingCodeGenerator(private val logger: KSPLogger) {
                 val targetName = (propType.declaration as? KSClassDeclaration)?.let { classDecl ->
                     val mappedType = classDecl.getAnnotation(AutoMapper::class)?.arguments
                         ?.getAnnotationArgumentValue<KSType>(
-                        "target")
+                            "target"
+                        )
                     mappedType?.declaration?.simpleName?.asString()
                 }
                 val sourceProperty = if (mappingInfo?.target == null || mappingInfo.target.isEmpty()) {

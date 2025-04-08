@@ -8,7 +8,7 @@ import com.google.devtools.ksp.symbol.KSAnnotation
  * @property target The target property for the default value.
  * @property code The code associated with the default value.
  */
-data class DefaultInfo (val target: String, val code: String)
+data class DefaultInfo(val target: String, val code: String)
 
 /**
  * Extension function to convert a `KSAnnotation` to a `DefaultInfo` object.
