@@ -1,4 +1,4 @@
-package com.morenko.automapper
+package com.morenko.automapper.exceptions
 
 /**
  * Exception thrown when a required annotation argument is not present.

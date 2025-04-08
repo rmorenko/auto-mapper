@@ -1,9 +1,8 @@
 package com.example
 
-import com.morenko.automapper.AutoMapper
-import com.morenko.automapper.Default
-import com.morenko.automapper.Mapping
-import com.morenko.automapper.MappingType
+import com.morenko.automapper.annotations.AutoMapper
+import com.morenko.automapper.annotations.Default
+import com.morenko.automapper.annotations.Mapping
 
 @AutoMapper(
     target = Entity::class,
@@ -12,10 +11,12 @@ import com.morenko.automapper.MappingType
     exclude = ["summary"]
 )
 data class Dto(
-    @Mapping(code = "multiply", type = MappingType.EXTENSION_FUNCTION)
+    @Mapping(invokeFn = "multiply")
     val id: Int,
-    @Mapping(code = "addPrefix", type = MappingType.FUNCTION)
+    @Mapping(mapFn = "addPrefix")
     val name: String,
+    @Mapping(invokeFn = "toString", mapFn = "addPrefix", mapFirst = false, target = "someAge")
+    val age: Int,
     @Mapping(code = "\"Prefix_\" + this.name")
     val status: String,
     val nested: NestedDto,
@@ -37,6 +38,7 @@ data class Entity(
     val status: String,
     val nested: NestedEntity,
     val summary: String? = null,
+    val someAge: String,
     val desc: String,
     val box: Box
 )

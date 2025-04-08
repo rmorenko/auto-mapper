@@ -1,4 +1,4 @@
-package com.morenko.automapper
+package com.morenko.automapper.annotations
 
 /**
  * Annotation to specify default values for properties during the mapping process.

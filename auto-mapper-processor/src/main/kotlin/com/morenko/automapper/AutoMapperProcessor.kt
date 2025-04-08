@@ -6,6 +6,8 @@ import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.morenko.automapper.annotations.AutoMapper
+import com.morenko.automapper.generators.MappingFunctionGenerator
 
 /**
  * Processes classes annotated with `@AutoMapper` and generates mapping functions.
@@ -14,7 +16,7 @@ class AutoMapperProcessor(private val codeGenerator: CodeGenerator, private val 
 
     private val processedClasses = mutableSetOf<String>()
 
-    private val mappingsCodeGenerator = MappingsCodeGenerator(logger)
+    private val mappingFunctionGenerator = MappingFunctionGenerator(logger)
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
         val symbols = resolver.getSymbolsWithAnnotation(AutoMapper::class.qualifiedName.orEmpty())
@@ -23,7 +25,7 @@ class AutoMapperProcessor(private val codeGenerator: CodeGenerator, private val 
 
         logger.info("Found annotated classes: ${symbols.map { it.simpleName.asString() }}")
         symbols.forEach { symbol ->
-            mappingsCodeGenerator.generateMapping(symbol, resolver, codeGenerator, processedClasses)
+            mappingFunctionGenerator.generate(symbol, resolver, codeGenerator, processedClasses)
         }
         return emptyList()
     }

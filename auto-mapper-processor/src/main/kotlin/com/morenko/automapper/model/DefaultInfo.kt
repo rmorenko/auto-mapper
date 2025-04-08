@@ -1,6 +1,7 @@
-package com.morenko.automapper
+package com.morenko.automapper.model
 
 import com.google.devtools.ksp.symbol.KSAnnotation
+import com.morenko.automapper.getAnnotationProperty
 
 /**
  * Data class representing default information for a mapping.

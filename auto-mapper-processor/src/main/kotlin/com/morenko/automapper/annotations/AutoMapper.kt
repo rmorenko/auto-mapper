@@ -1,4 +1,4 @@
-package com.morenko.automapper
+package com.morenko.automapper.annotations
 
 import kotlin.reflect.KClass
 

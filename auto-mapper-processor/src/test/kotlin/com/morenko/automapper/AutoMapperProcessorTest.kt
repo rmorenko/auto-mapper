@@ -3,8 +3,8 @@ package com.morenko.automapper
 
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
-import com.tschuchort.compiletesting.symbolProcessorProviders
 import com.tschuchort.compiletesting.kspSourcesDir
+import com.tschuchort.compiletesting.symbolProcessorProviders
 import io.kotest.core.spec.style.FeatureSpec
 import io.kotest.matchers.file.shouldExist
 import io.kotest.matchers.shouldBe
@@ -19,7 +19,7 @@ class AutoMapperProcessorTest : FeatureSpec({
             "TestDto.kt", """
             package com.example
 
-            import com.morenko.automapper.AutoMapper
+            import com.morenko.automapper.annotations.AutoMapper
 
             @AutoMapper(TestEntity::class)
             data class TestDto(val id: String, val name: String)
