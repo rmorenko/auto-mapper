@@ -6,6 +6,8 @@ import com.google.devtools.ksp.symbol.KSType
 import com.morenko.automapper.annotations.AutoMapper
 import com.morenko.automapper.getAnnotation
 import com.morenko.automapper.getAnnotationArgumentValue
+import com.morenko.automapper.model.AutoMapperInfo
+import com.morenko.automapper.model.DefaultInfo
 import com.morenko.automapper.model.MappingInfo
 
 /**
@@ -20,20 +22,20 @@ class PropertyMappingsGenerator(private val logger: KSPLogger) {
 
     /**
      * @param classDeclaration The class declaration to generate the mapping function for.
-     * @param mappings information from 'Mapping' annotation for each property in source class.
-     * @param excludes The set of properties names, that excludes from mappings\
+     * @param mappings The information from 'Mapping' annotation for each property in source class.
+     * @param autoMapperInfo The resolved information from AutoMapper annotation attributes
      * @return generated mappings
      */
     fun generate(
         classDeclaration: KSClassDeclaration,
         mappings: Map<String, MappingInfo>,
-        excludes: Set<String>
+        autoMapperInfo: AutoMapperInfo,
     ): String {
         val sourceProperties = getSourceProperties(classDeclaration)
         logger.info("Target properties:  $sourceProperties")
         return classDeclaration.getAllProperties()
-            .filter {
-                it.simpleName.asString() !in excludes
+            .filter { prop ->
+                prop.simpleName.asString() !in autoMapperInfo.excludes
             }
             .map { prop ->
                 logger.info("Create mapping for :  $prop")
@@ -62,7 +64,7 @@ class PropertyMappingsGenerator(private val logger: KSPLogger) {
                         propertyExpressionGenerator.generate(propName, propType, targetName, mappingInfo)
             }.filter { str ->
                 str.isNotEmpty()
-            }.joinToString(",\n")
+            }.joinToString(",\n") + addDefaults(autoMapperInfo.defaults)
     }
 
 
@@ -75,6 +77,18 @@ class PropertyMappingsGenerator(private val logger: KSPLogger) {
         return (type.declaration as KSClassDeclaration).getAllProperties()
             .map { it.simpleName.asString() }
             .toSet()
+    }
+
+    private fun addDefaults(defaults: Set<DefaultInfo>): String {
+        val defaultsStr = defaults.joinToString(",\n") {
+            "${it.target} = ${it.code}"
+        }
+        if (defaultsStr.isNotEmpty()) {
+            logger.info("Default: $defaultsStr")
+            return ",\n    $defaultsStr"
+        }
+        logger.info("Default: $defaultsStr")
+        return defaultsStr
     }
 
 }

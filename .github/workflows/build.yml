@@ -52,3 +52,9 @@ jobs:
         with:
             name: dokka-html
             path: build/dokka
+
+      - name: Upload code coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-html
+          path: auto-mapper-processor/build/jacocoHtml

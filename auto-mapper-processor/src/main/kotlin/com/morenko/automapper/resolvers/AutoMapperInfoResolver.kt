@@ -35,8 +35,11 @@ class AutoMapperInfoResolver(private val logger: KSPLogger) {
         val sourceName = targetType.declaration.simpleName.asString()
 
         return AutoMapperInfo(
-            sourcePackage = sourcePackage,
-            sourceName = sourceName, targetType = targetType, defaults = defaults, excludes = excludes
+            targetPackage = sourcePackage,
+            targetName = sourceName,
+            additionalImports = additionalImports,
+            defaults = defaults,
+            excludes = excludes
         )
     }
 }

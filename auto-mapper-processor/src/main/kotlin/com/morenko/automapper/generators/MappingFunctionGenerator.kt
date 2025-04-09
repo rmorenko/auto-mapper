@@ -6,7 +6,6 @@ import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.morenko.automapper.annotations.Mapping
-import com.morenko.automapper.model.DefaultInfo
 import com.morenko.automapper.model.MappingInfo
 import com.morenko.automapper.resolvers.AutoMapperInfoResolver
 import com.morenko.automapper.resolvers.MappingInfoResolver
@@ -49,22 +48,22 @@ class MappingFunctionGenerator(private val logger: KSPLogger) {
         processedClasses.add(sourceClassName)
         val autoMapperInfo = autoMaResolver.resolve(classDeclaration)
 
-        val functionName = "map${sourceClassName}To${autoMapperInfo.sourceName}"
+        val functionName = "map${sourceClassName}To${autoMapperInfo.targetName}"
         val fileName = "${sourceClassName}Mapper"
 
         val functionBuilder = FunSpec.builder(functionName)
             .receiver(classDeclaration.toClassName())
-            .returns(ClassName(autoMapperInfo.sourcePackage, autoMapperInfo.sourceName))
+            .returns(ClassName(autoMapperInfo.targetPackage, autoMapperInfo.targetName))
 
         val mappings = mappingInfoResolver.resolve(classDeclaration)
         logger.info("Resolved mappings information:  $mappings")
         val propertyMappings = propertyMappingsGenerator.generate(
             classDeclaration, mappings,
-            autoMapperInfo.excludes
-        ) + addDefaults(autoMapperInfo.defaults)
+            autoMapperInfo
+        )
         logger.info("Generated property mappings: $propertyMappings")
 
-        functionBuilder.addStatement("return ${autoMapperInfo.sourceName}(\n$propertyMappings\n    )")
+        functionBuilder.addStatement("return ${autoMapperInfo.targetName}(\n$propertyMappings\n    )")
 
         val fileBuilder = FileSpec.builder(sourcePackageName, fileName)
         addImports(mappings, resolver, fileBuilder, autoMapperInfo.additionalImports)
@@ -92,17 +91,5 @@ class MappingFunctionGenerator(private val logger: KSPLogger) {
         additionalImports.forEach {
             fileBuilder.addImport(it, "")
         }
-    }
-
-    private fun addDefaults(defaults: Set<DefaultInfo>): String {
-        val defaultsStr = defaults.joinToString(",\n") {
-            "${it.target} = ${it.code}"
-        }
-        if (defaultsStr.isNotEmpty()) {
-            logger.info("Default: $defaultsStr")
-            return ",\n    $defaultsStr"
-        }
-        logger.info("Default: $defaultsStr")
-        return defaultsStr
     }
 }
