@@ -6,6 +6,8 @@ import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.morenko.automapper.annotations.AutoMapper
 import com.morenko.automapper.exceptions.AnnotationArgumentNotPresent
+import com.morenko.automapper.exceptions.AnnotationNotPresent
+import com.morenko.automapper.exceptions.MultiplyAnnotationException
 import com.morenko.automapper.getAnnotation
 import com.morenko.automapper.getAnnotationArgumentValue
 import com.morenko.automapper.model.AutoMapperInfo
@@ -14,11 +16,14 @@ import com.morenko.automapper.model.toDefaultInfo
 class AutoMapperInfoResolver(private val logger: KSPLogger) {
 
     fun resolve(classDeclaration: KSClassDeclaration): AutoMapperInfo {
+        validate(classDeclaration)
         val arguments = classDeclaration.getAnnotation(AutoMapper::class)?.arguments.orEmpty()
+        arguments.ifEmpty {
+            throw AnnotationNotPresent(AutoMapper::class)
+        }
         logger.info("${AutoMapper::class.simpleName} arguments: $arguments")
-        val annotationName = AutoMapper::class.simpleName.toString()
         val targetType = arguments.getAnnotationArgumentValue<KSType>("target")
-            ?: throw AnnotationArgumentNotPresent(annotationName, "target")
+            ?: throw AnnotationArgumentNotPresent(AutoMapper::class, "target")
         val defaults = arguments.getAnnotationArgumentValue<ArrayList<KSAnnotation>>("defaults")
             ?.map(KSAnnotation::toDefaultInfo)
             ?.filter { defaultInfo ->
@@ -41,5 +46,11 @@ class AutoMapperInfoResolver(private val logger: KSPLogger) {
             defaults = defaults,
             excludes = excludes
         )
+    }
+
+    private fun validate(classDeclaration: KSClassDeclaration) {
+        if (classDeclaration.annotations.count {
+                AutoMapper::class.simpleName.toString() == it.shortName.asString()
+            } > 1) throw MultiplyAnnotationException(AutoMapper::class)
     }
 }

@@ -6,15 +6,65 @@ import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSName
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.KSValueArgument
-
+import com.morenko.automapper.annotations.AutoMapper
+import com.morenko.automapper.exceptions.AnnotationNotPresent
+import com.morenko.automapper.exceptions.MultiplyAnnotationException
+import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import java.io.Serial
+
+private val annotationSimpleName =  AutoMapper::class.simpleName.toString()
 
 class AutoMapperInfoResolverTest : StringSpec({
     val logger = mockk<KSPLogger>(relaxed = true)
     val resolver = AutoMapperInfoResolver(logger)
+
+    "resolve should failed without AutoMapperAnnotation" {
+        val classDeclaration = mockk<KSClassDeclaration>()
+        val someAnnotation = mockk<KSAnnotation>()
+        val someAnnotationName = mockk<KSName>()
+
+        every {
+            someAnnotationName.asString()
+        } returns Serial::class.simpleName.toString()
+
+        every {
+            someAnnotation.shortName
+        } returns someAnnotationName
+
+        every {
+            classDeclaration.annotations
+        } returns listOf(someAnnotation).asSequence()
+        shouldThrowExactly<AnnotationNotPresent> {
+            resolver.resolve(classDeclaration)
+        }
+    }
+
+    "resolve should failed with multiply AutoMapperAnnotation" {
+        val classDeclaration = mockk<KSClassDeclaration>()
+        val mappingAnnotationOne = mockk<KSAnnotation>()
+        val mappingAnnotationTwo = mockk<KSAnnotation>()
+        val annotationName = mockk<KSName>()
+
+        every {
+            annotationName.asString()
+        } returns annotationSimpleName
+
+        every {
+            mappingAnnotationOne.shortName
+            mappingAnnotationTwo.shortName
+        } returns annotationName
+
+        every {
+            classDeclaration.annotations
+        } returns listOf(mappingAnnotationTwo, mappingAnnotationTwo).asSequence()
+        shouldThrowExactly<MultiplyAnnotationException> {
+            resolver.resolve(classDeclaration)
+        }
+    }
 
     "resolve should return correct AutoMapperInfo when only target argument present" {
         val classDeclaration = mockk<KSClassDeclaration>()
@@ -27,7 +77,7 @@ class AutoMapperInfoResolverTest : StringSpec({
 
         every {
             autoMapperAnnotationName.asString()
-        } returns "AutoMapper"
+        } returns annotationSimpleName
 
         every {
             classDeclaration.annotations
@@ -75,7 +125,7 @@ class AutoMapperInfoResolverTest : StringSpec({
 
         every {
             autoMapperAnnotationName.asString()
-        } returns "AutoMapper"
+        } returns annotationSimpleName
 
         every {
             classDeclaration.annotations
@@ -185,7 +235,7 @@ class AutoMapperInfoResolverTest : StringSpec({
 
         every {
             autoMapperAnnotationName.asString()
-        } returns "AutoMapper"
+        } returns annotationSimpleName
 
         every {
             classDeclaration.annotations
@@ -270,7 +320,7 @@ class AutoMapperInfoResolverTest : StringSpec({
 
         every {
             autoMapperAnnotationName.asString()
-        } returns "AutoMapper"
+        } returns annotationSimpleName
 
         every {
             classDeclaration.annotations
