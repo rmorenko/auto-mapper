@@ -3,6 +3,7 @@ package com.morenko.automapper.resolvers
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.morenko.automapper.annotations.Mapping
+import com.morenko.automapper.exceptions.MultiplyAnnotationException
 import com.morenko.automapper.getAnnotationProperty
 import com.morenko.automapper.model.MappingInfo
 
@@ -22,23 +23,26 @@ class MappingInfoResolver(private val logger: KSPLogger) {
     fun resolve(classDeclaration: KSClassDeclaration): Map<String, MappingInfo> {
         return classDeclaration.getAllProperties()
             .map { prop ->
+                if (prop.annotations.count() > 1) {
+                    throw MultiplyAnnotationException(Mapping::class)
+                }
                 val annotation = prop.annotations.firstOrNull {
                     it.shortName.asString() ==
                             Mapping::class.simpleName.toString()
                 }
                 val arguments = annotation?.arguments.orEmpty()
-                Triple(prop, annotation, arguments)
+                prop to arguments
             }
-            .filter { (_, _, arguments) ->
+            .filter { (_, arguments) ->
                 arguments.isNotEmpty()
-            }.associate { (prop, annotation, arguments) ->
+            }.associate { (prop, arguments) ->
                 val propName = prop.simpleName.asString()
                 logger.info("Function annotation arguments: $arguments")
-                val code = annotation?.getAnnotationProperty("code").orEmpty()
-                val mapFn = annotation?.getAnnotationProperty("mapFn").orEmpty()
-                val invokeFn = annotation?.getAnnotationProperty("invokeFn").orEmpty()
-                val target = annotation?.getAnnotationProperty("target").orEmpty()
-                val mapFirst = annotation?.getAnnotationProperty("mapFirst").toBoolean()
+                val code = arguments.getAnnotationProperty("code").orEmpty()
+                val mapFn = arguments.getAnnotationProperty("mapFn").orEmpty()
+                val invokeFn = arguments.getAnnotationProperty("invokeFn").orEmpty()
+                val target = arguments.getAnnotationProperty("target").orEmpty()
+                val mapFirst = arguments.getAnnotationProperty("mapFirst").toBoolean()
                 propName to MappingInfo(
                     code = code,
                     mapFn = mapFn,

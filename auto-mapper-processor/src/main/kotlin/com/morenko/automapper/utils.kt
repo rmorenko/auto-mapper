@@ -12,7 +12,17 @@ import kotlin.reflect.KClass
  * @return The value of the specified annotation property as a trimmed string, or null if not found.
  */
 fun KSAnnotation.getAnnotationProperty(name: String): String? {
-    return this.arguments.firstOrNull { agr ->
+    return this.arguments.getAnnotationProperty(name)
+}
+
+/**
+ * Extension function to retrieve the value of a specified annotation property.
+ *
+ * @param name The name of the annotation property to retrieve.
+ * @return The value of the specified annotation property as a trimmed string, or null if not found.
+ */
+fun Collection<KSValueArgument>.getAnnotationProperty(name: String): String? {
+    return firstOrNull { agr ->
         agr.name?.getShortName() == name
     }?.value?.toString()?.trim()
 }
