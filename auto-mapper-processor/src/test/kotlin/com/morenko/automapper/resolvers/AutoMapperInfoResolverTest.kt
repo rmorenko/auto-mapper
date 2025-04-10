@@ -6,6 +6,8 @@ import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSName
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.KSValueArgument
+import com.morenko.automapper.exceptions.AnnotationNotPresent
+import io.kotest.assertions.throwables.shouldThrowExactly
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
@@ -15,6 +17,27 @@ import io.mockk.mockk
 class AutoMapperInfoResolverTest : StringSpec({
     val logger = mockk<KSPLogger>(relaxed = true)
     val resolver = AutoMapperInfoResolver(logger)
+
+    "resolve should failed without AutoMapperAnnotation" {
+        val classDeclaration = mockk<KSClassDeclaration>()
+        val someAnnotation= mockk<KSAnnotation>()
+        val someAnnotationName = mockk<KSName>()
+
+        every {
+            someAnnotationName.asString()
+        } returns "Serial"
+
+        every {
+            someAnnotation.shortName
+        } returns someAnnotationName
+
+        every {
+            classDeclaration.annotations
+        } returns listOf(someAnnotation).asSequence()
+        shouldThrowExactly<AnnotationNotPresent> {
+            resolver.resolve(classDeclaration)
+        }
+    }
 
     "resolve should return correct AutoMapperInfo when only target argument present" {
         val classDeclaration = mockk<KSClassDeclaration>()

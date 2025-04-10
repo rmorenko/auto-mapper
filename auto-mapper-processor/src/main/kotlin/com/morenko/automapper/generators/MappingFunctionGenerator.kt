@@ -23,9 +23,10 @@ import com.squareup.kotlinpoet.ksp.writeTo
 
 class MappingFunctionGenerator(private val logger: KSPLogger) {
 
+    private val autoMaResolver = AutoMapperInfoResolver(logger)
     private val mappingInfoResolver = MappingInfoResolver(logger)
     private val propertyMappingsGenerator = PropertyMappingsGenerator(logger)
-    private val autoMaResolver = AutoMapperInfoResolver(logger)
+
 
     /**
      * Generates a mapping function for the given class declaration.
