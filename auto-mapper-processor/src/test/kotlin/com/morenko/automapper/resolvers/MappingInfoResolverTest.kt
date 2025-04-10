@@ -8,9 +8,12 @@ import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSValueArgument
 
 import com.morenko.automapper.annotations.Mapping
+import com.morenko.automapper.exceptions.MultiplyAnnotationException
+import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldBeEmpty
 import io.mockk.every
 import io.mockk.mockk
 
@@ -84,6 +87,107 @@ class MappingInfoResolverTest : StringSpec({
         actualResult.size shouldBe 0
 
     }
+
+    "resolve should fail when duplicate Mapping annotation" {
+        val classDeclaration = mockk<KSClassDeclaration>()
+        val mappingAnnotation = mockk<KSAnnotation>()
+        every {
+            classDeclaration.annotations
+        } returns listOf(mappingAnnotation, mappingAnnotation).asSequence()
+
+        val propertyDeclaration = mockk<KSPropertyDeclaration>().apply {
+            every { annotations } returns listOf(mappingAnnotation, mappingAnnotation).asSequence()
+            every { simpleName.asString() } returns "sourceProperty"
+        }
+
+
+        val propertyDeclarations = listOf(propertyDeclaration
+        ).asSequence()
+
+        every {
+            classDeclaration.getAllProperties()
+        } returns propertyDeclarations
+
+        val mappingAnnotationName = mockk<KSName>()
+
+        every {
+            mappingAnnotationName.asString()
+        } returns annotationSimpleName
+
+        every {
+            mappingAnnotation.shortName.asString()
+        } returns Mapping::class.simpleName.toString()
+
+
+        every {
+            mappingAnnotation.shortName
+        } returns mappingAnnotationName
+
+        shouldThrowExactly<MultiplyAnnotationException> {
+            resolver.resolve(classDeclaration)
+        }
+    }
+
+    "resolve should return correct answer when empty annotation arguments values" {
+        val classDeclaration = mockk<KSClassDeclaration>()
+        val mappingAnnotation = mockk<KSAnnotation>()
+        every {
+            classDeclaration.annotations
+        } returns listOf(mappingAnnotation).asSequence()
+
+        val propertyDeclaration = mockk<KSPropertyDeclaration>().apply {
+            every { annotations } returns listOf(mappingAnnotation).asSequence()
+            every { simpleName.asString() } returns "sourceProperty"
+        }
+
+
+        val propertyDeclarations = listOf(propertyDeclaration
+        ).asSequence()
+
+        every {
+            classDeclaration.getAllProperties()
+        } returns propertyDeclarations
+
+        val mappingAnnotationName = mockk<KSName>()
+
+        every {
+            mappingAnnotationName.asString()
+        } returns annotationSimpleName
+
+        every {
+            mappingAnnotation.shortName.asString()
+        } returns Mapping::class.simpleName.toString()
+
+
+        every {
+            mappingAnnotation.shortName
+        } returns mappingAnnotationName
+
+        val arguments = listOf(
+            mockk<KSValueArgument>().apply {
+                every {
+                    name?.getShortName()
+                } returns "mapFirst"
+
+                every {
+                    value
+                } returns true
+            }
+        )
+
+        every {
+            mappingAnnotation.arguments
+        } returns arguments
+
+        val actualResult = resolver.resolve(classDeclaration)
+        val mappingInfo = actualResult["sourceProperty"]
+        mappingInfo.shouldNotBeNull()
+        mappingInfo.mapFirst shouldBe true
+        mappingInfo.code.shouldBeEmpty()
+        mappingInfo.mapFn.shouldBeEmpty()
+        mappingInfo.invokeFn.shouldBeEmpty()
+    }
+
 
     "resolve should return correct answer" {
         val classDeclaration = mockk<KSClassDeclaration>()
