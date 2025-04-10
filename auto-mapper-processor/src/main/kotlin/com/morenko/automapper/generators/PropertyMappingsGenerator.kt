@@ -9,6 +9,7 @@ import com.morenko.automapper.getAnnotationArgumentValue
 import com.morenko.automapper.model.AutoMapperInfo
 import com.morenko.automapper.model.DefaultInfo
 import com.morenko.automapper.model.MappingInfo
+import com.squareup.kotlinpoet.ksp.toClassName
 
 /**
  * Class responsible for generation properties mappings based on class declaration
@@ -61,7 +62,8 @@ class PropertyMappingsGenerator(private val logger: KSPLogger) {
                 }
                 return@map "    " +
                         "$sourceProperty = " +
-                        propertyExpressionGenerator.generate(propName, propType, targetName, mappingInfo)
+                        propertyExpressionGenerator.generate(propName, propType.toClassName().simpleName,
+                            targetName, mappingInfo)
             }.filter { str ->
                 str.isNotEmpty()
             }.joinToString(",\n") + addDefaults(autoMapperInfo.defaults)

@@ -1,9 +1,8 @@
 package com.morenko.automapper.generators
 
 import com.google.devtools.ksp.processing.KSPLogger
-import com.google.devtools.ksp.symbol.KSType
 import com.morenko.automapper.model.MappingInfo
-import com.squareup.kotlinpoet.ksp.toClassName
+
 
 /**
  * Class responsible for generation expression based on mapping information in Mapping annotation.
@@ -16,13 +15,13 @@ class PropertyExpressionGenerator(private val logger: KSPLogger) {
      * Generate expression based on the property name, property type, target entity name, and mapping information.
      *
      * @param propName The name of the property.
-     * @param propType The type of the property.
-     * @param targetEntityName The name of the target entity.
+     * @param propertyClassName The name of property class
+     * @param targetEntityName The name of the target class.
      * @param mappingInfo The mapping information.
      * @return The code expression for the function.
      */
-    fun generate(propName: String, propType: KSType, targetEntityName: String?, mappingInfo: MappingInfo?) =
-        generate(getArgumentPart(propName, propType, targetEntityName, mappingInfo), mappingInfo).also {
+    fun generate(propName: String, propertyClassName: String, targetEntityName: String?, mappingInfo: MappingInfo?) =
+        generate(getArgumentPart(propName, propertyClassName, targetEntityName, mappingInfo), mappingInfo).also {
             logger.info("Generated expression $it")
         }
 
@@ -40,11 +39,11 @@ class PropertyExpressionGenerator(private val logger: KSPLogger) {
 
     private fun getArgumentPart(
         propName: String,
-        propType: KSType,
+        propertyClassName: String,
         targetEntityName: String?,
         mappingInfo: MappingInfo?
     ): String = if (targetEntityName != null) {
-        "this.$propName.map${propType.toClassName().simpleName}" +
+        "this.$propName.map$propertyClassName" +
                 "To$targetEntityName()"
     } else if (mappingInfo != null && mappingInfo.code.isNotEmpty()) {
         mappingInfo.code
