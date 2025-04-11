@@ -11,9 +11,17 @@ class PropertyExpressionGeneratorTest : StringSpec({
     val logger = mockk<KSPLogger>(relaxed = true)
     val generator = PropertyExpressionGenerator(logger)
 
-    "should generate expression with mapping info" {
+    "should generate expression with mapping info and target with targetEntityName " {
         val mappingInfo = MappingInfo(mapFn = "mapFunction", invokeFn = "invokeFunction",
             mapFirst = true, code = "customCode")
+        val result = generator.generate("propertyName", "PropertyClass",
+            "TargetEntity", mappingInfo)
+        result shouldBe "mapFunction(customCode).invokeFunction()"
+    }
+
+    "should generate expression with mapping info and target with targetEntityName and empty code " {
+        val mappingInfo = MappingInfo(mapFn = "mapFunction", invokeFn = "invokeFunction",
+            mapFirst = true, code = "")
         val result = generator.generate("propertyName", "PropertyClass",
             "TargetEntity", mappingInfo)
         result shouldBe "mapFunction(this.propertyName.mapPropertyClassToTargetEntity()).invokeFunction()"

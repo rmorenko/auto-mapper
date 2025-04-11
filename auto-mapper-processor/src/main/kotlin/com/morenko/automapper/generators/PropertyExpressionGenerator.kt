@@ -42,11 +42,11 @@ class PropertyExpressionGenerator(private val logger: KSPLogger) {
         propertyClassName: String,
         targetEntityName: String?,
         mappingInfo: MappingInfo?
-    ): String = if (targetEntityName != null) {
+    ): String = if (mappingInfo != null && mappingInfo.code.isNotEmpty()) {
+        mappingInfo.code
+    } else if (targetEntityName != null) {
         "this.$propName.map$propertyClassName" +
                 "To$targetEntityName()"
-    } else if (mappingInfo != null && mappingInfo.code.isNotEmpty()) {
-        mappingInfo.code
     } else {
         "this.$propName"
     }.also {

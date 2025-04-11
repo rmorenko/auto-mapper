@@ -23,7 +23,7 @@ import com.squareup.kotlinpoet.ksp.writeTo
 
 class MappingFunctionGenerator(private val logger: KSPLogger) {
 
-    private val autoMaResolver = AutoMapperInfoResolver(logger)
+    private val autoMapperInfoResolver = AutoMapperInfoResolver(logger)
     private val mappingInfoResolver = MappingInfoResolver(logger)
     private val propertyMappingsGenerator = PropertyMappingsGenerator(logger)
 
@@ -45,9 +45,11 @@ class MappingFunctionGenerator(private val logger: KSPLogger) {
         val sourcePackageName = classDeclaration.packageName.asString()
         val sourceClassName = classDeclaration.simpleName.asString()
 
-        if (processedClasses.contains(sourceClassName)) return
-        processedClasses.add(sourceClassName)
-        val autoMapperInfo = autoMaResolver.resolve(classDeclaration)
+        val qualifiedName = "$sourcePackageName.$sourceClassName"
+
+        if (processedClasses.contains(qualifiedName)) return
+        processedClasses.add("$sourcePackageName.$sourceClassName")
+        val autoMapperInfo = autoMapperInfoResolver.resolve(classDeclaration)
 
         val functionName = "map${sourceClassName}To${autoMapperInfo.targetName}"
         val fileName = "${sourceClassName}Mapper"
