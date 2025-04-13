@@ -1,0 +1,48 @@
+[versions]
+kotlin = "2.1.10"
+detekt = "1.23.8"
+dokka = "2.0.0"
+kotlinpoet = "1.13.0"
+kotlinpoet-ksp = "2.1.0"
+ksp = "2.1.10-1.0.31"
+kotest = "5.9.1"
+kotlin-compile-testing-ksp = "1.6.0"
+mockk = "1.13.17"
+
+[libraries]
+kotlinpoet = { module = "com.squareup:kotlinpoet", version.ref = "kotlinpoet" }
+kotlinpoet-ksp = { module = "com.squareup:kotlinpoet-ksp", version.ref = "kotlinpoet-ksp" }
+symbol-processing-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
+kotlin-test-junit5 = { module = "org.jetbrains.kotlin:kotlin-test-junit5", version.ref = "kotlin" }
+kotest-runner-junit5-jvm = { module = "io.kotest:kotest-runner-junit5-jvm", version.ref = "kotest" }
+kotest-property = { module = "io.kotest:kotest-property", version.ref = "kotest" }
+kotest-extensions-junitxml = { module = "io.kotest:kotest-extensions-junitxml", version.ref = "kotest" }
+kotlin-compile-testing-ksp = { module = "com.github.tschuchortdev:kotlin-compile-testing-ksp", version.ref = "kotlin-compile-testing-ksp"}
+mockk = { module = "io.mockk:mockk",  version.ref = "mockk"}
+
+
+[plugins]
+kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+
+[bundles]
+kotlinpoet = [
+    "kotlinpoet",
+    "kotlinpoet-ksp"
+]
+
+ksp = [
+    "symbol-processing-api"
+]
+
+test = [
+    "kotlin-test-junit5",
+    "kotest-runner-junit5-jvm",
+    "kotest-property",
+    "kotest-extensions-junitxml",
+    "kotlin-compile-testing-ksp",
+    "mockk"
+]

@@ -48,5 +48,5 @@ fun KSClassDeclaration.getAnnotation(annotationClass: KClass<*>): KSAnnotation? 
 fun <T> Collection<KSValueArgument>.getAnnotationArgumentValue(argumentName: String): T? {
     return this.firstOrNull {
         argumentName == it.name?.getShortName()
-    }?.value as T
+    }?.value as? T
 }
