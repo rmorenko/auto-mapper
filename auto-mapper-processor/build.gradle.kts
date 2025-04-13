@@ -1,14 +1,10 @@
 plugins {
-    kotlin("jvm") version "2.1.10"
-    id("io.gitlab.arturbosch.detekt") version "1.23.8"
-    id("org.jetbrains.dokka") version "1.8.10" // Add Dokka plugin for KDoc generation
-    id("org.jetbrains.kotlin.plugin.serialization") version "2.1.10"
+    alias(libs.plugins.kotlin)
+    alias(libs.plugins.serialization)
+    alias(libs.plugins.detekt)
+    alias(libs.plugins.dokka)
     jacoco
-    `java-library`
 }
-
-group = "com.morenko.automapper"
-version = "1.0-SNAPSHOT"
 
 repositories {
     google()
@@ -22,17 +18,10 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib"))
-    implementation("com.squareup:kotlinpoet:1.13.0")
-    implementation("com.squareup:kotlinpoet-ksp:2.1.0")
-    implementation("com.google.devtools.ksp:symbol-processing-api:2.1.10-1.0.31")
+    implementation(libs.bundles.kotlinpoet)
+    implementation(libs.bundles.ksp)
     testImplementation(kotlin("test"))
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5:2.1.10")
-    testImplementation("io.kotest:kotest-runner-junit5-jvm:5.9.1")
-    testImplementation("io.kotest:kotest-property:5.9.1")
-    testImplementation("io.kotest:kotest-extensions-junitxml:5.9.1")
-    testImplementation("com.github.tschuchortdev:kotlin-compile-testing-ksp:1.6.0")
-    testImplementation("com.google.devtools.ksp:symbol-processing-api:2.1.10-1.0.31")
-    testImplementation("io.mockk:mockk:1.13.17")
+    testImplementation(libs.bundles.test)
 }
 
 tasks.withType<Test>().configureEach {
@@ -59,7 +48,6 @@ tasks.register<Jar>("fatJar") {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
-// Configure Dokka for KDoc generation
 tasks.dokkaHtml.configure {
     outputDirectory.set(layout.buildDirectory.get().asFile.resolve("dokka"))
     dokkaSourceSets {
@@ -74,7 +62,9 @@ jacoco {
 }
 
 tasks.test {
-    finalizedBy(tasks.jacocoTestReport) // report is always generated after tests run
+    systemProperty("kotest.framework.classpath.scanning.autoscan.disable", "true")
+    jvmArgs("-XX:+EnableDynamicAgentLoading", "-Djdk.instrument.traceUsage")
+    finalizedBy(tasks.jacocoTestReport)
 }
 tasks.jacocoTestReport {
     dependsOn(tasks.test) // tests are required to run before generating the report

@@ -1,6 +1,14 @@
 plugins {
-    kotlin("jvm") version "2.1.10"
+    alias(libs.plugins.kotlin)
+    alias(libs.plugins.serialization)
+    alias(libs.plugins.detekt)
+    alias(libs.plugins.dokka)
+    jacoco
 }
+
+group = "com.morenko.automapper"
+version = "1.0-SNAPSHOT"
+
 
 repositories {
     google()
