@@ -34,7 +34,7 @@ jobs:
         id: deployment
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '.'   
+          path: 'auto-mapper-processor'   
   deploy:
     environment:
       name: github-pages
