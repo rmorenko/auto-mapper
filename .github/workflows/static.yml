@@ -1,9 +1,9 @@
-name: Deploy static content to Pages
+name: kdoc
 
 on:
   push:
     branches: ["master"]
-    
+
   workflow_dispatch:
 
 permissions:
@@ -34,7 +34,7 @@ jobs:
         id: deployment
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './auto-mapper-processor/build/dokka'   
+          path: './auto-mapper-processor/build/dokka/html'
   deploy:
     environment:
       name: github-pages

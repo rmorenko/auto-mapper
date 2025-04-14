@@ -1,0 +1,40 @@
+concurrency:
+  group: "release"
+  cancel-in-progress: false
+
+name: release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_version:
+        description: 'Release new version'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'adopt'
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Setup git config
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "<>"
+
+
+      - name: Release with Gradle Release Plugin
+        run: ./gradlew release

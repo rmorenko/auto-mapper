@@ -18,6 +18,7 @@ import io.mockk.declaringKotlinFile
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
+import io.mockk.verify
 
 class PropertyMappingsGeneratorTest : StringSpec({
 
@@ -32,15 +33,20 @@ class PropertyMappingsGeneratorTest : StringSpec({
             every { simpleName.asString() } returns "propertyTwo"
         }
 
-        val ksClassDeclaration1 = mockk<KSClassDeclaration>{
+        val targetPropertyDeclarationFour = mockk<KSPropertyDeclaration> {
+            every { simpleName.asString() } returns "propertyFour"
+        }
+
+        val targetClassDeclaration = mockk<KSClassDeclaration> {
             every { getAllProperties() } returns listOf(targetPropertyDeclarationOne,
-                targetPropertyDeclarationTwo).asSequence()
+                targetPropertyDeclarationTwo, targetPropertyDeclarationFour
+            ).asSequence()
         }
 
         val ksType = mockk<KSType>{
             every {
                 declaration
-            } returns ksClassDeclaration1
+            } returns targetClassDeclaration
         }
 
         val argument = mockk<KSValueArgument>{
@@ -137,6 +143,27 @@ class PropertyMappingsGeneratorTest : StringSpec({
             } returns typeReferenceThree
         }
 
+
+        val ksTypeFourDeclaration = mockk<KSClassDeclaration> {
+            every { annotations } returns emptyList<KSAnnotation>().asSequence()
+        }
+
+        val ksTypeFour = mockk<KSType> {
+            every { declaration } returns ksTypeFourDeclaration
+        }
+
+
+        val typeReferenceFour = mockk<KSTypeReference> {
+            every { resolve() } returns ksTypeFour
+        }
+
+        val sourcePropertyDeclarationFour = mockk<KSPropertyDeclaration> {
+            every { simpleName.asString() } returns "propertyFour"
+            every {
+                type
+            } returns typeReferenceFour
+        }
+
         val ksClassDeclaration = mockk<KSClassDeclaration>{
             every {
                 packageName.asString()
@@ -149,14 +176,19 @@ class PropertyMappingsGeneratorTest : StringSpec({
                 getAllProperties()
             } returns listOf(
                 sourcePropertyDeclarationOne,
-                sourcePropertyDeclarationTwo, sourcePropertyDeclarationThree
+                sourcePropertyDeclarationTwo,
+                sourcePropertyDeclarationThree,
+                sourcePropertyDeclarationFour
             ).asSequence()
 
             every {
                 annotations
             } returns listOf(annotation).asSequence()
         }
-        val autoMapperInfo = AutoMapperInfo("com.target", "TargetClass")
+        val autoMapperInfo = AutoMapperInfo(
+            "com.target", "TargetClass",
+            excludes = setOf("propertyFour")
+        )
         val propertyMappingsGenerator = PropertyMappingsGenerator(logger)
         val propertyExpressionGenerator = mockk<PropertyExpressionGenerator> {
             every {
@@ -171,14 +203,56 @@ class PropertyMappingsGeneratorTest : StringSpec({
                     null, null
                 )
             } returns "generated expression two"
+
+            every {
+                generate(
+                    "propertyThree", "String",
+                    null, null
+                )
+            } returns "generated expression three"
+
+            every {
+                generate(
+                    "propertyFour", "String",
+                    null, null
+                )
+            } returns "generated expression four"
         }
         propertyMappingsGenerator.setPrivateField("propertyExpressionGenerator", propertyExpressionGenerator)
+
         propertyMappingsGenerator.generate(
             ksClassDeclaration,
             emptyMap(),
             autoMapperInfo
         ) shouldBe """    propertyOne = generated expression one,
     propertyTwo = generated expression two"""
+
+        verify(exactly = 1) {
+            propertyExpressionGenerator.generate(
+                "propertyOne", "NestedSourceClass",
+                "NestedTargetClass", null
+            )
+
+            propertyExpressionGenerator.generate(
+                "propertyTwo", "String",
+                null, null
+            )
+
+
+        }
+
+        verify(exactly = 0) {
+
+            propertyExpressionGenerator.generate(
+                "propertyThree", "String",
+                null, null
+            )
+
+            propertyExpressionGenerator.generate(
+                "propertyFour", "String",
+                null, null
+            )
+        }
     }
 
     "should not generate code when no properties are provided" {

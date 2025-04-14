@@ -8,6 +8,7 @@ ksp = "2.1.10-1.0.31"
 kotest = "5.9.1"
 kotlin-compile-testing-ksp = "1.6.0"
 mockk = "1.13.17"
+release="3.1.0"
 
 [libraries]
 kotlinpoet = { module = "com.squareup:kotlinpoet", version.ref = "kotlinpoet" }
@@ -27,6 +28,7 @@ detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+release ={ id = "net.researchgate.release", version.ref = "release"}
 
 [bundles]
 kotlinpoet = [
