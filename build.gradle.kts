@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.detekt)
     alias(libs.plugins.dokka)
     jacoco
+    `maven-publish`
 }
 
 group = "com.morenko.automapper"

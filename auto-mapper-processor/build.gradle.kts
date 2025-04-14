@@ -4,7 +4,12 @@ plugins {
     alias(libs.plugins.detekt)
     alias(libs.plugins.dokka)
     jacoco
+    id("java-library")
+    id("maven-publish")
 }
+
+group = "com.morenko.automapper"
+version = "1.0-SNAPSHOT"
 
 repositories {
     google()
@@ -36,8 +41,10 @@ tasks.named("check") {
 }
 
 tasks.register<Jar>("fatJar") {
-    archiveBaseName.set("auto-mapper-with-dependencies")
-    archiveVersion.set("1.0")
+    description = "Build jar with dependencies"
+    group = "jars"
+    archiveBaseName.set("${project.name}-with-dependencies")
+    archiveVersion.set(version.toString())
     from(sourceSets.main.get().output)
 
     dependsOn(configurations.runtimeClasspath)
@@ -49,7 +56,6 @@ tasks.register<Jar>("fatJar") {
 }
 
 tasks.dokkaHtml.configure {
-    outputDirectory.set(layout.buildDirectory.get().asFile.resolve("dokka"))
     dokkaSourceSets {
         configureEach {
             includes.from("module.md")
@@ -72,5 +78,41 @@ tasks.jacocoTestReport {
         xml.required = false
         csv.required =  true
         html.outputLocation = layout.buildDirectory.dir("jacocoHtml")
+    }
+}
+
+
+val javadocJar by tasks.register<Jar>("javadocJar") {
+    description = "Build jars with javadocs"
+    group = "docs"
+    archiveClassifier.set("javadoc")
+    archiveBaseName.set(project.name)
+    from(layout.buildDirectory.get().asFile.resolve("dokka/html"))
+    mustRunAfter(tasks.named("dokkaHtml"))
+}
+
+
+java {
+    withSourcesJar()
+}
+
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            from(components["java"])
+        }
+        create<MavenPublication>("mavenJavadocJar") {
+            artifact(javadocJar)
+        }
+        create<MavenPublication>("mavenFatJar") {
+            artifact(tasks.named("fatJar").get()) {
+                artifactId = project.name
+                classifier = "jar-with-dependencies"
+            }
+
+            groupId = "${project.group}"
+            version = "${project.version}"
+        }
     }
 }

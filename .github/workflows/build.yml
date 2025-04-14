@@ -4,12 +4,9 @@ on:
   push:
     branches:
       - master
+
   pull_request:
     branches:
-      - master
-
-  pull_request_target:
-      branches:
       - master
 
   workflow_dispatch:
@@ -52,6 +49,9 @@ jobs:
       - name: Generate docs
         run: ./gradlew dokkaHtml
 
+      - name: Build fat jar
+        run: ./gradlew fatJar
+
       - name: Upload Dokka artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -63,6 +63,12 @@ jobs:
         with:
           name: jacoco-html
           path: auto-mapper-processor/build/jacocoHtml
+
+      - name: Upload snapshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifacts
+          path: auto-mapper-processor/build/libs
 
       - name: Generate JaCoCo Badge
         uses: cicirello/jacoco-badge-generator@v2
