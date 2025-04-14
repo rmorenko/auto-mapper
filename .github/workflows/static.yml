@@ -31,13 +31,13 @@ jobs:
       - name: Generate docs
         run: ./gradlew dokkaHtml
       - name: Check documentation build results
-        working-directory: ./auto-mapper-processor/build
+        working-directory: ./auto-mapper-processor/build/dokka
         run: ls -la
       - name: Upload static files as artifact
         id: deployment
         uses: actions/upload-pages-artifact@v3
         with:
-          path: 'auto-mapper-processor/build/dokka/html'   
+          path: './auto-mapper-processor/build/dokka/html'   
   deploy:
     environment:
       name: github-pages
