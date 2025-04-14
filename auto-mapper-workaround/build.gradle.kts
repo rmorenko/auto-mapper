@@ -22,6 +22,9 @@ dependencies {
     ksp(project(":auto-mapper-processor"))
 }
 
+group = rootProject.group
+version = rootProject.version
+
 tasks.dokkaHtml.configure {
     outputDirectory.set(layout.buildDirectory.get().asFile.resolve("dokka"))
     dokkaSourceSets {

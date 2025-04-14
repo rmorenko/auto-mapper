@@ -7,10 +7,6 @@ plugins {
     `maven-publish`
 }
 
-group = "com.morenko.automapper"
-version = "1.0-SNAPSHOT"
-
-
 repositories {
     google()
     mavenCentral()
@@ -20,3 +16,8 @@ repositories {
         }
     }
 }
+
+group = "com.morenko.automapper"
+version = project.findProperty("version") ?: "SNAPSHOT"
+
+

@@ -3,13 +3,13 @@ plugins {
     alias(libs.plugins.serialization)
     alias(libs.plugins.detekt)
     alias(libs.plugins.dokka)
+    alias(libs.plugins.release)
+
     jacoco
     id("java-library")
     id("maven-publish")
 }
 
-group = "com.morenko.automapper"
-version = "1.0-SNAPSHOT"
 
 repositories {
     google()
@@ -28,6 +28,9 @@ dependencies {
     testImplementation(kotlin("test"))
     testImplementation(libs.bundles.test)
 }
+
+group = rootProject.group
+version = rootProject.version
 
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
@@ -114,5 +117,24 @@ publishing {
             groupId = "${project.group}"
             version = "${project.version}"
         }
+    }
+}
+
+release {
+    failOnCommitNeeded.set(true)
+    failOnPublishNeeded.set(true)
+    failOnSnapshotDependencies.set(true)
+    failOnUnversionedFiles.set(true)
+    failOnUpdateNeeded.set(true)
+    preTagCommitMessage.set("[Gradle Release Plugin] - pre tag commit: ")
+    tagCommitMessage.set("[Gradle Release Plugin] - creating tag: ")
+    newVersionCommitMessage.set("[Gradle Release Plugin] - new version commit: ")
+    tagTemplate.set("\${version}")
+    versionPropertyFile.set("gradle.properties")
+    snapshotSuffix.set("-SNAPSHOT")
+    buildTasks.set(emptyList<String>())
+
+    git {
+        requireBranch.set("main")
     }
 }
