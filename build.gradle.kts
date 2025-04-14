@@ -18,6 +18,6 @@ repositories {
 }
 
 group = "com.morenko.automapper"
-version = project.findProperty("version") ?: "SNAPSHOT"
+version = properties["version"] ?: "SNAPSHOT"
 
 
