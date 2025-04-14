@@ -10,8 +10,8 @@ on:
       release_version:
         description: 'Release new version'
 
-  permissions:
-    contents: write
+permissions:
+  contents: write
 
   jobs:
     release:
