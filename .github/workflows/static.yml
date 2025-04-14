@@ -34,7 +34,7 @@ jobs:
         id: deployment
         uses: actions/upload-pages-artifact@v3
         with:
-          path: 'auto-mapper-processor'   
+          path: 'auto-mapper-processor/build/dokka/html'   
   deploy:
     environment:
       name: github-pages
