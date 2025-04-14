@@ -30,6 +30,9 @@ jobs:
         run: chmod +x ./gradlew
       - name: Generate docs
         run: ./gradlew dokkaHtml
+      - name: Check documentation build results
+        working-directory: ./auto-mapper-processor
+        run: ls -la
       - name: Upload static files as artifact
         id: deployment
         uses: actions/upload-pages-artifact@v3
