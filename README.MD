@@ -1,11 +1,11 @@
 # AutoMapper Project
 
 Welcome to the documentation for the AutoMapper project. This project is designed to automatically generate mapping 
-functions for data classes. 
+functions for Kotlin data classes. 
 
 ## Author
 My [LinkedIn](https://www.linkedin.com/in/roman-morenko-5091b6258/) profile.
-For comments, ideas and suggestions [Email Me](mailto:morenko83@gmail.com)
+For comments, ideas and suggestions: [email me](mailto:morenko83@gmail.com) | [te.me](https://t.me/roman_morenko)
 
 ## What is it?
 AutoMapper is a code generator that simplifies the implementation of mappings between Kotlin data classes based on a

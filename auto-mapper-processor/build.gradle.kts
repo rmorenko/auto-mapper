@@ -30,6 +30,7 @@ dependencies {
 
 group = rootProject.group
 version = rootProject.version
+description = "This project is designed to automatically generate mapping functions for Kotlin data classes."
 
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
@@ -103,18 +104,52 @@ publishing {
     publications {
         create<MavenPublication>("maven") {
             from(components["java"])
-        }
-        create<MavenPublication>("mavenJavadocJar") {
             artifact(javadocJar)
-        }
-        create<MavenPublication>("mavenFatJar") {
             artifact(tasks.named("fatJar").get()) {
                 artifactId = project.name
                 classifier = "jar-with-dependencies"
             }
+            pom {
+                name.set(project.name)
+                description.set(project.description)
+                url.set("https://github.com/rmorenko/auto-mapper")
+                issueManagement {
+                    url.set("https://github.com/rmorenko/auto-mapper/issues")
+                }
 
-            groupId = "${project.group}"
-            version = "${project.version}"
+                scm {
+                    url.set("https://github.com/rmorenko/auto-mapper")
+                    connection.set("scm:git://github.com/rmorenko/auto-mapper.git")
+                    developerConnection.set("scm:git://github.com/rmorenko/auto-mapper.git")
+                }
+
+                licenses {
+                    license {
+                        name.set("MIT License")
+                        url.set("https://www.mit.edu/~amini/LICENSE.md")
+                        distribution.set("repo")
+                    }
+                }
+
+                developers {
+                    developer {
+                        id.set("rmorenko")
+                        name.set("Roman Morenko")
+                        email.set("morenko83@gmail.com")
+                        url.set("https://www.linkedin.com/in/roman-morenko-5091b6258/")
+                    }
+                }
+            }
+            repositories {
+                maven {
+                    name = "GitHubPackages"
+                    url = uri("https://maven.pkg.github.com/rmorenko/auto-mapper")
+                    credentials {
+                        username = System.getenv("USERNAME")
+                        password = System.getenv("TOKEN")
+                    }
+                }
+            }
         }
     }
 }
