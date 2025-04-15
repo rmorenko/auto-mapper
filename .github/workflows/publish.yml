@@ -20,5 +20,5 @@ jobs:
         run: ./gradlew build dokkaHtml fatJar publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          USER: ${{ secrets.GITHUB_TOKEN }}
+          USERNAME: ${{ secrets.USERNAME }}
+          TOKEN: ${{ secrets.TOKEN }}
