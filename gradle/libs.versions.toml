@@ -2,7 +2,7 @@
 kotlin = "2.1.10"
 detekt = "1.23.8"
 dokka = "2.0.0"
-kotlinpoet = "1.13.0"
+kotlinpoet = "2.1.0"
 kotlinpoet-ksp = "2.1.0"
 ksp = "2.1.20-2.0.0"
 kotest = "5.9.1"
