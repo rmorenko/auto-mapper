@@ -102,9 +102,8 @@ val kdocJar by tasks.register<Jar>("kdocJar") {
     mustRunAfter(tasks.named("dokkaHtml"))
 }
 
-tasks.named("generateMetadataFileForMavenPublication") {
-    dependsOn(kdocJar, fatJar)
-}
+tasks.findByName("generateMetadataFileForMavenPublication")
+    ?.dependsOn(kdocJar, fatJar)
 
 java {
     withSourcesJar()
