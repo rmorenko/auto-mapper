@@ -146,6 +146,14 @@ publishing {
                     name = "GitHubPackages"
                     url = uri("https://maven.pkg.github.com/rmorenko/auto-mapper")
                     credentials {
+                        username = System.getenv("USERNAME")
+                        password = System.getenv("TOKEN")
+                    }
+                }
+                maven {
+                    name = "MavenCentral"
+                    url = uri("https://central.sonatype.com/api/v1/publisher")
+                    credentials {
                         username = System.getenv("CENTRAL_USER_NAME")
                         password = System.getenv("MAVEN_CENTRAL_PASSWORD")
                     }
