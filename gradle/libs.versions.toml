@@ -7,7 +7,7 @@ kotlinpoet-ksp = "2.1.0"
 ksp = "2.1.20-2.0.0"
 kotest = "5.9.1"
 kotlin-compile-testing-ksp = "1.6.0"
-mockk = "1.13.17"
+mockk = "1.14.0"
 release="3.1.0"
 
 [libraries]
