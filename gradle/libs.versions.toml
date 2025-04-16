@@ -30,7 +30,7 @@ serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref 
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 release = { id = "net.researchgate.release", version.ref = "release"}
-mavenCentral = { id =  "org.danilopianini.publish-on-central", version.ref = "release" }
+mavenCentral = { id =  "org.danilopianini.publish-on-central", version.ref = "mavenCentral" }
 
 [bundles]
 kotlinpoet = [

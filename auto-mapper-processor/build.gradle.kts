@@ -102,16 +102,6 @@ val kdocJar by tasks.register<Jar>("kdocJar") {
     mustRunAfter(tasks.named("dokkaHtml"))
 }
 
-
-tasks.named<Sign>("signJavaOSSRHPublication") {
-    inputs.files(tasks.named<Jar>("kdocJar"),
-        tasks.named<Jar>("fatJar"),
-        tasks.named<Jar>("jar"))
-}
-
-
-
-
 java {
 }
 
