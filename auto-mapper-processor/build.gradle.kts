@@ -150,6 +150,14 @@ publishing {
                         password = System.getenv("MAVEN_CENTRAL_PASSWORD")
                     }
                 }
+                maven {
+                    name = "MavenCentral"
+                    url = uri("https://central.sonatype.com/api/v1/publisher")
+                    credentials {
+                        username = System.getenv("CENTRAL_USER_NAME")
+                        password = System.getenv("MAVEN_CENTRAL_PASSWORD")
+                    }
+                }
             }
         }
     }
