@@ -1,3 +1,5 @@
+import cn.lalaki.pub.BaseCentralPortalPlusExtension.PublishingType
+
 plugins {
     alias(libs.plugins.kotlin)
     alias(libs.plugins.serialization)
@@ -10,10 +12,14 @@ plugins {
     id("signing")
 }
 
-publishOnCentral {
-    repoOwner.set("rmorenko")
-    projectDescription.set("""This project is designed to automatically generate 
-        |mapping functions for Kotlin data classes""".trimIndent())
+val localMavenRepo = uri("${projectDir.absolutePath}/stage")
+centralPortalPlus {
+    url = localMavenRepo
+
+    username = System.getenv("MAVEN_CENTRAL_PORTAL_USERNAME")
+    password = System.getenv("MAVEN_CENTRAL_PORTAL_PASSWORD")
+
+    publishingType = PublishingType.AUTOMATIC
 }
 
 
@@ -151,6 +157,9 @@ publishing {
                 }
             }
             repositories {
+                maven {
+                    url = localMavenRepo
+                }
                 maven {
                     name = "GitHubPackages"
                     url = uri("https://maven.pkg.github.com/rmorenko/auto-mapper")
