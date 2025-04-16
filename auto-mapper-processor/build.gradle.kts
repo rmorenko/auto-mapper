@@ -103,6 +103,14 @@ val kdocJar by tasks.register<Jar>("kdocJar") {
 }
 
 
+tasks.named<Sign>("signJavaOSSRHPublication") {
+    inputs.files(tasks.named<Jar>("kdocJar"),
+        tasks.named<Jar>("fatJar"))
+}
+
+
+
+
 java {
 }
 
