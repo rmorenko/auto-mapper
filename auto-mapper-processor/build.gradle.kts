@@ -1,13 +1,25 @@
+import cn.lalaki.pub.BaseCentralPortalPlusExtension.PublishingType
+
 plugins {
     alias(libs.plugins.kotlin)
     alias(libs.plugins.serialization)
     alias(libs.plugins.detekt)
     alias(libs.plugins.dokka)
-
+    alias(libs.plugins.mavenCentral)
     jacoco
     id("java-library")
     id("maven-publish")
     id("signing")
+}
+
+val localMavenRepo = uri("${projectDir.absolutePath}/stage")
+centralPortalPlus {
+    url = localMavenRepo
+
+    username = System.getenv("MAVEN_CENTRAL_PORTAL_USERNAME")
+    password = System.getenv("MAVEN_CENTRAL_PORTAL_PASSWORD")
+
+    publishingType = PublishingType.AUTOMATIC
 }
 
 
@@ -44,7 +56,7 @@ tasks.named("check") {
     dependsOn("detektMain", "detektTest")
 }
 
-tasks.register<Jar>("fatJar") {
+val fatJar = tasks.register<Jar>("fatJar") {
     description = "Build jar with dependencies"
     group = "jars"
     archiveBaseName.set("${project.name}-with-dependencies")
@@ -86,7 +98,8 @@ tasks.jacocoTestReport {
 }
 
 
-val javadocJar by tasks.register<Jar>("javadocJar") {
+
+val kdocJar by tasks.register<Jar>("kdocJar") {
     description = "Build jars with javadocs"
     group = "docs"
     archiveClassifier.set("javadoc")
@@ -95,6 +108,8 @@ val javadocJar by tasks.register<Jar>("javadocJar") {
     mustRunAfter(tasks.named("dokkaHtml"))
 }
 
+tasks.findByName("generateMetadataFileForMavenPublication")
+    ?.dependsOn(kdocJar, fatJar)
 
 java {
     withSourcesJar()
@@ -105,7 +120,7 @@ publishing {
     publications {
         create<MavenPublication>("maven") {
             from(components["java"])
-            artifact(javadocJar)
+            artifact(kdocJar)
             artifact(tasks.named("fatJar").get()) {
                 artifactId = project.name
                 classifier = "jar-with-dependencies"
@@ -142,6 +157,9 @@ publishing {
                 }
             }
             repositories {
+                maven {
+                    url = localMavenRepo
+                }
                 maven {
                     name = "GitHubPackages"
                     url = uri("https://maven.pkg.github.com/rmorenko/auto-mapper")

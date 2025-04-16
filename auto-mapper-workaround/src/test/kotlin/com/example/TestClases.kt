@@ -1,8 +1,8 @@
 package com.example
 
-import com.morenko.automapper.annotations.AutoMapper
-import com.morenko.automapper.annotations.Default
-import com.morenko.automapper.annotations.Mapping
+import io.github.rmorenko.automapper.annotations.AutoMapper
+import io.github.rmorenko.automapper.annotations.Default
+import io.github.rmorenko.automapper.annotations.Mapping
 
 @AutoMapper(
     target = Entity::class,
