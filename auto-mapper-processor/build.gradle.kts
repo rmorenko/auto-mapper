@@ -3,13 +3,20 @@ plugins {
     alias(libs.plugins.serialization)
     alias(libs.plugins.detekt)
     alias(libs.plugins.dokka)
-
+    alias(libs.plugins.mavenCentral)
     jacoco
     id("java-library")
     id("maven-publish")
     id("signing")
 }
 
+publishOnCentral {
+    repoOwner.set("rmorenko")
+    projectDescription.set("""This project is designed to automatically generate 
+        |mapping functions for Kotlin data classes""".trimIndent())
+    mavenCentral.user.set(System.getenv().get("CENTRAL_USER_NAME"))
+    mavenCentral.password.set(provider { System.getenv().get("MAVEN_CENTRAL_PASSWORD") })
+}
 
 repositories {
     google()
@@ -86,7 +93,7 @@ tasks.jacocoTestReport {
 }
 
 
-val javadocJar by tasks.register<Jar>("javadocJar") {
+val kdocJar by tasks.register<Jar>("kdocJar") {
     description = "Build jars with javadocs"
     group = "docs"
     archiveClassifier.set("javadoc")
@@ -97,7 +104,6 @@ val javadocJar by tasks.register<Jar>("javadocJar") {
 
 
 java {
-    withSourcesJar()
 }
 
 
@@ -105,7 +111,7 @@ publishing {
     publications {
         create<MavenPublication>("maven") {
             from(components["java"])
-            artifact(javadocJar)
+            artifact(kdocJar)
             artifact(tasks.named("fatJar").get()) {
                 artifactId = project.name
                 classifier = "jar-with-dependencies"
@@ -148,22 +154,6 @@ publishing {
                     credentials {
                         username = System.getenv("USERNAME")
                         password = System.getenv("TOKEN")
-                    }
-                }
-                maven {
-                    name = "MavenCentral"
-                    url = uri("https://central.sonatype.com/api/v1/publisher")
-                    credentials {
-                        username = System.getenv("CENTRAL_USER_NAME")
-                        password = System.getenv("MAVEN_CENTRAL_PASSWORD")
-                    }
-                }
-                maven {
-                    name = "MavenCentral"
-                    url = uri("https://central.sonatype.com/api/v1/publisher")
-                    credentials {
-                        username = System.getenv("CENTRAL_USER_NAME")
-                        password = System.getenv("MAVEN_CENTRAL_PASSWORD")
                     }
                 }
             }
