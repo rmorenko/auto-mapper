@@ -487,5 +487,5 @@ public fun Error.mapErrorToErrorDto(): ErrorDto = ErrorDto(
 In _ErrorMapper.kt_ generated nested mapping function
 
 
-## API documentation 
+## API documentation for last release
 [KDoc ](https://rmorenko.github.io/auto-mapper/)
