@@ -14,6 +14,7 @@ publishOnCentral {
     repoOwner.set("rmorenko")
     projectDescription.set("""This project is designed to automatically generate 
         |mapping functions for Kotlin data classes""".trimIndent())
+    mavenCentral.user.set(System.getenv().get("MAVEN_CENTRAL_PORTAL_USERNAME"))
 }
 
 
