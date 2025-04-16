@@ -104,7 +104,6 @@ val kdocJar by tasks.register<Jar>("kdocJar") {
 
 
 java {
-    withSourcesJar()
 }
 
 
