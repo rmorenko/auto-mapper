@@ -19,7 +19,7 @@ centralPortalPlus {
     username = System.getenv("MAVEN_CENTRAL_PORTAL_USERNAME")
     password = System.getenv("MAVEN_CENTRAL_PORTAL_PASSWORD")
 
-    publishingType = PublishingType.USER_MANAGED
+    publishingType = PublishingType.AUTOMATIC
 }
 
 
