@@ -93,7 +93,7 @@ tasks.jacocoTestReport {
 }
 
 
-val javadocJar by tasks.register<Jar>("javadocJar") {
+val kdocJar by tasks.register<Jar>("kdocJar") {
     description = "Build jars with javadocs"
     group = "docs"
     archiveClassifier.set("javadoc")
@@ -112,7 +112,7 @@ publishing {
     publications {
         create<MavenPublication>("maven") {
             from(components["java"])
-            artifact(javadocJar)
+            artifact(kdocJar)
             artifact(tasks.named("fatJar").get()) {
                 artifactId = project.name
                 classifier = "jar-with-dependencies"
