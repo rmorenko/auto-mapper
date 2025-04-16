@@ -3,13 +3,21 @@ plugins {
     alias(libs.plugins.serialization)
     alias(libs.plugins.detekt)
     alias(libs.plugins.dokka)
-
+    alias(libs.plugins.mavenCentral)
+    id ("org.danilopianini.publish-on-central") version "<pick the latest>"
     jacoco
     id("java-library")
     id("maven-publish")
     id("signing")
 }
 
+publishOnCentral {
+    repoOwner.set("rmorenko")
+    projectDescription.set("""This project is designed to automatically generate 
+        |mapping functions for Kotlin data classes""".trimIndent())
+    mavenCentral.user.set(System.getenv().get("CENTRAL_USER_NAME"))
+    mavenCentral.password.set(provider { System.getenv().get("MAVEN_CENTRAL_PASSWORD") })
+}
 
 repositories {
     google()
@@ -148,14 +156,6 @@ publishing {
                     credentials {
                         username = System.getenv("USERNAME")
                         password = System.getenv("TOKEN")
-                    }
-                }
-                maven {
-                    name = "MavenCentral"
-                    url = uri("https://central.sonatype.com/api/v1/publisher")
-                    credentials {
-                        username = System.getenv("CENTRAL_USER_NAME")
-                        password = System.getenv("MAVEN_CENTRAL_PASSWORD")
                     }
                 }
             }
