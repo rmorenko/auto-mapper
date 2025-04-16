@@ -151,7 +151,7 @@ publishing {
                     }
                 }
                 maven {
-                    name = "Сentral"
+                    name = "MavenCentral"
                     url = uri("https://central.sonatype.com/api/v1/publisher")
                     credentials {
                         username = System.getenv("CENTRAL_USER_NAME")
