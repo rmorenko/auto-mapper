@@ -92,6 +92,7 @@ tasks.jacocoTestReport {
 }
 
 
+
 val kdocJar by tasks.register<Jar>("kdocJar") {
     description = "Build jars with javadocs"
     group = "docs"
@@ -101,7 +102,12 @@ val kdocJar by tasks.register<Jar>("kdocJar") {
     mustRunAfter(tasks.named("dokkaHtml"))
 }
 
+tasks.named("generateMetadataFileForMavenPublication") {
+    dependsOn(kdocJar)
+}
+
 java {
+    withSourcesJar()
 }
 
 
