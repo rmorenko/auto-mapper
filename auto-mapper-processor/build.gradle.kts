@@ -12,7 +12,7 @@ plugins {
     id("signing")
 }
 
-val localMavenRepo = uri("/auto-mapper-processor/stage")
+val localMavenRepo = uri("${projectDir.absolutePath}/stage")
 centralPortalPlus {
     url = localMavenRepo
 
