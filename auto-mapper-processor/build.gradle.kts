@@ -14,8 +14,6 @@ publishOnCentral {
     repoOwner.set("rmorenko")
     projectDescription.set("""This project is designed to automatically generate 
         |mapping functions for Kotlin data classes""".trimIndent())
-    mavenCentral.user.set(System.getenv().get("CENTRAL_USER_NAME"))
-    mavenCentral.password.set(provider { System.getenv().get("MAVEN_CENTRAL_PASSWORD") })
 }
 
 repositories {
@@ -105,7 +103,8 @@ val kdocJar by tasks.register<Jar>("kdocJar") {
 
 tasks.named<Sign>("signJavaOSSRHPublication") {
     inputs.files(tasks.named<Jar>("kdocJar"),
-        tasks.named<Jar>("fatJar"))
+        tasks.named<Jar>("fatJar"),
+        tasks.named<Jar>("jar"))
 }
 
 
