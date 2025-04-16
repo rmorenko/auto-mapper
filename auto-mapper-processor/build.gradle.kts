@@ -14,7 +14,6 @@ publishOnCentral {
     repoOwner.set("rmorenko")
     projectDescription.set("""This project is designed to automatically generate 
         |mapping functions for Kotlin data classes""".trimIndent())
-    mavenCentral.user.set(System.getenv().get("MAVEN_CENTRAL_PORTAL_USERNAME"))
 }
 
 
@@ -51,7 +50,7 @@ tasks.named("check") {
     dependsOn("detektMain", "detektTest")
 }
 
-tasks.register<Jar>("fatJar") {
+val fatJar = tasks.register<Jar>("fatJar") {
     description = "Build jar with dependencies"
     group = "jars"
     archiveBaseName.set("${project.name}-with-dependencies")
@@ -93,6 +92,7 @@ tasks.jacocoTestReport {
 }
 
 
+
 val kdocJar by tasks.register<Jar>("kdocJar") {
     description = "Build jars with javadocs"
     group = "docs"
@@ -102,7 +102,11 @@ val kdocJar by tasks.register<Jar>("kdocJar") {
     mustRunAfter(tasks.named("dokkaHtml"))
 }
 
+tasks.findByName("generateMetadataFileForMavenPublication")
+    ?.dependsOn(kdocJar, fatJar)
+
 java {
+    withSourcesJar()
 }
 
 
