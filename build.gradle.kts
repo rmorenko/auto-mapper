@@ -18,7 +18,7 @@ repositories {
     }
 }
 
-group = "com.morenko.automapper"
+group = "io.github.rmorenko"
 version = properties["version"] ?: "UNKNOWN"
 
 release {

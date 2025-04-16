@@ -30,8 +30,8 @@ If you’re using Gradle to build your project add the following to your_build.g
 
 ```kotlin
 dependencies {
-    implementation(group = "com.morenko.automapper",  name ="auto-mapper-processor", version  = "$version")
-    ksp(group = "com.morenko.automapper",  name ="auto-mapper-processor",
+    implementation(group = "io.github.rmorenko",  name ="auto-mapper-processor", version  = "$version")
+    ksp(group = "io.github.rmorenko",  name ="auto-mapper-processor",
         classifier = "jar-with-dependencies",
         version  = "$version")
 }
@@ -41,8 +41,8 @@ or to  _build.gradle_
 
 ```groovy
 dependencies {
-    implementation(group: "com.morenko.automapper", name: "auto-mapper-processor", version: "$version")
-    ksp(group: "com.morenko.automapper", name: "auto-mapper-processor", classifier: "jar-with-dependencies", version: "$version")
+    implementation(group: "io.github.rmorenko", name: "auto-mapper-processor", version: "$version")
+    ksp(group: "io.github.rmorenko", name: "auto-mapper-processor", classifier: "jar-with-dependencies", version: "$version")
 }
 ```
 
@@ -51,7 +51,7 @@ If you’re using Maven to build your project add the following to your _pom.xml
 ```xml
 <dependencies>
     <dependency>
-        <groupId>com.morenko.automapper</groupId>
+        <groupId>io.github.rmorenko</groupId>
         <artifactId>auto-mapper-processor</artifactId>
         <classifier>jar-with-dependencies</classifier>
         <version>$version</version>
@@ -82,7 +82,7 @@ property class of target class. If classes have the same properties it will be e
 package com.example.entity
 
 import com.example.dto.Dto
-import com.morenko.automapper.annotations.AutoMapper
+import io.github.rmorenko.automapper.annotations.AutoMapper
 
 @AutoMapper(target = Dto::class)
 data class Entity(
@@ -126,7 +126,7 @@ _AutoMapper_ annotation:
 package com.example.entity
 
 import com.example.dto.Dto
-import com.morenko.automapper.annotations.AutoMapper
+import io.github.rmorenko.automapper.annotations.AutoMapper
 
 @AutoMapper(target = Dto::class, exclude = ["title", "age"])
 data class Entity(
@@ -164,7 +164,7 @@ you want to set custom code in mapping functions. This cases describe in section
 package com.example.entity
 
 import com.example.dto.Dto
-import com.morenko.automapper.annotations.AutoMapper
+import io.github.rmorenko.automapper.annotations.AutoMapper
 
 @AutoMapper(target = Dto::class, imports = ["kotlin.also"])
 data class Entity(
@@ -200,8 +200,8 @@ class. For this property will set value that declared in _code_ property:
 package com.example.entity
 
 import com.example.dto.Dto
-import com.morenko.automapper.annotations.AutoMapper
-import com.morenko.automapper.annotations.Default
+import io.github.rmorenko.automapper.annotations.AutoMapper
+import io.github.rmorenko.automapper.annotations.Default
 
 @AutoMapper(target = Dto::class, defaults = [
 Default("title", code = """
@@ -242,8 +242,8 @@ on property in source class. In _target_ property set name of property in target
 package com.example.entity
 
 import com.example.dto.Dto
-import com.morenko.automapper.annotations.AutoMapper
-import com.morenko.automapper.annotations.Mapping
+import io.github.rmorenko.automapper.annotations.AutoMapper
+import io.github.rmorenko.automapper.annotations.Mapping
 
 @AutoMapper(target = Dto::class)
 data class Entity(
@@ -281,8 +281,8 @@ toplevel function.
 package com.example.entity
 
 import com.example.dto.Dto
-import com.morenko.automapper.annotations.AutoMapper
-import com.morenko.automapper.annotations.Mapping
+import io.github.rmorenko.automapper.annotations.AutoMapper
+import io.github.rmorenko.automapper.annotations.Mapping
 
 @AutoMapper(target = Dto::class)
 data class Entity(
@@ -331,8 +331,8 @@ for returning result of last expression in block:
 package com.example.entity
 
 import com.example.dto.Dto
-import com.morenko.automapper.annotations.AutoMapper
-import com.morenko.automapper.annotations.Mapping
+import io.github.rmorenko.automapper.annotations.AutoMapper
+import io.github.rmorenko.automapper.annotations.Mapping
 
 
 @AutoMapper(target = Dto::class)
@@ -377,8 +377,8 @@ in _code_:
 package com.example.entity
 
 import com.example.dto.Dto
-import com.morenko.automapper.annotations.AutoMapper
-import com.morenko.automapper.annotations.Mapping
+import io.github.rmorenko.automapper.annotations.AutoMapper
+import io.github.rmorenko.automapper.annotations.Mapping
 
 @AutoMapper(target = Dto::class)
 data class Entity(
@@ -422,7 +422,7 @@ error with custom type Error.
 package com.example.entity
 
 import com.example.dto.Dto
-import com.morenko.automapper.annotations.AutoMapper
+import io.github.rmorenko.automapper.annotations.AutoMapper
 
 @AutoMapper(target = Dto::class)
 data class Entity(
@@ -434,7 +434,7 @@ val error: Error
 package com.example.entity
 
 import com.example.dto.ErrorDto
-import com.morenko.automapper.annotations.AutoMapper
+import io.github.rmorenko.automapper.annotations.AutoMapper
 
 @AutoMapper(target = ErrorDto::class)
 data class Error (
