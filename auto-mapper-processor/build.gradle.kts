@@ -50,7 +50,7 @@ tasks.named("check") {
     dependsOn("detektMain", "detektTest")
 }
 
-tasks.register<Jar>("fatJar") {
+val fatJar = tasks.register<Jar>("fatJar") {
     description = "Build jar with dependencies"
     group = "jars"
     archiveBaseName.set("${project.name}-with-dependencies")
@@ -103,7 +103,7 @@ val kdocJar by tasks.register<Jar>("kdocJar") {
 }
 
 tasks.named("generateMetadataFileForMavenPublication") {
-    dependsOn(kdocJar)
+    dependsOn(kdocJar, fatJar)
 }
 
 java {
