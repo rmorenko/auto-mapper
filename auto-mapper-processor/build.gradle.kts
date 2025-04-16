@@ -7,6 +7,7 @@ plugins {
     jacoco
     id("java-library")
     id("maven-publish")
+    id("signing")
 }
 
 
@@ -151,5 +152,13 @@ publishing {
                 }
             }
         }
+    }
+
+    signing {
+        useInMemoryPgpKeys(
+            System.getenv("GPG_SECRET_KEY"),
+            System.getenv("GPG_PASSWORD")
+        )
+        sign(publishing.publications["maven"])
     }
 }
