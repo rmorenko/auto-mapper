@@ -4,7 +4,6 @@ plugins {
     alias(libs.plugins.detekt)
     alias(libs.plugins.dokka)
     alias(libs.plugins.mavenCentral)
-    id ("org.danilopianini.publish-on-central") version "<pick the latest>"
     jacoco
     id("java-library")
     id("maven-publish")
