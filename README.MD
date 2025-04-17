@@ -324,8 +324,7 @@ You can execute custom code blocks in _Mapping_ annotation. Add _code_ property
 with custom code. And result for this code map to target property value. 
 In example below for property _name_defined simple expression, that concatenate
 _name_ and _description_ values. For property _description_ we define more 
-complex snippet - block of code wrapped with _{ }_ with _.invoke()_ after block 
-for returning result of last expression in block:
+complex snippet, that contains two expressions:
 
 ```kotlin
 package com.example.entity
@@ -340,13 +339,38 @@ data class Entity(
 @Mapping(code = "this.name + this.description")
 val name: String,
 @Mapping(code = """
-{ val a = 0;
+val a = 0;
+this.description + a;
+""")
+val description: String
+)
+```
+<code style="color : red">Important!! Before version _1.0.2_ if code contains more than one expression, 
+you should wrap it with _{ ... }.invoke()_</code>
+
+
+```kotlin
+package com.example.entity
+
+import com.example.dto.Dto
+import io.github.rmorenko.automapper.annotations.AutoMapper
+import io.github.rmorenko.automapper.annotations.Mapping
+
+
+@AutoMapper(target = Dto::class)
+data class Entity(
+@Mapping(code = "this.name + this.description")
+val name: String,
+@Mapping(code = """
+val a = 0;
 this.description + a;
 }.invoke()
 """)
 val description: String
 )
 ```
+
+
 ```kotlin
 package com.example.dto
 
