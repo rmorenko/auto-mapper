@@ -16,7 +16,7 @@ class PropertyExpressionGeneratorTest : StringSpec({
         val mappingInfo = MappingInfo(target="test", functionName = "mapFunction", code = "customCode")
         val result = generator.generate("propertyName", "PropertyClass",
             "TargetEntity", mappingInfo)
-        result shouldBe "mapFunction(customCode)"
+        result shouldBe "mapFunction({ customCode }.invoke())"
     }
 
     "generate expression with targetEntityName, functionName and empty code" {
@@ -50,7 +50,7 @@ class PropertyExpressionGeneratorTest : StringSpec({
         val mappingInfo = MappingInfo(target="test", functionName = "mapFunction", code = "customCode")
         val result = generator.generate("propertyName", "PropertyClass",
             null, mappingInfo)
-        result shouldBe "mapFunction(customCode)"
+        result shouldBe "mapFunction({ customCode }.invoke())"
     }
 
     "generate expression with null targetEntityName, not empty functionName and empty code" {
@@ -85,7 +85,7 @@ class PropertyExpressionGeneratorTest : StringSpec({
         val mappingInfo = MappingInfo(target="test", functionName = "mapFunction", code = "customCode")
         val result = generator.generate("propertyName", "PropertyClass",
             "  ", mappingInfo)
-        result shouldBe "mapFunction(customCode)"
+        result shouldBe "mapFunction({ customCode }.invoke())"
     }
 
     "generate expression with blank targetEntityName, not empty functionName and empty code" {
