@@ -177,6 +177,9 @@ publishing {
             System.getenv("GPG_SECRET_KEY"),
             System.getenv("GPG_PASSWORD")
         )
-        sign(publishing.publications["maven"])
+        if (System.getenv("GPG_SECRET_KEY") != null
+            && System.getenv("GPG_PASSWORD")!= null) {
+            sign(publishing.publications["maven"])
+        }
     }
 }

@@ -17,6 +17,7 @@ import io.mockk.mockk
 import java.io.Serial
 
 private val annotationSimpleName =  AutoMapper::class.simpleName.toString()
+private val annotationFullName =  AutoMapper::class.qualifiedName.toString()
 
 class AutoMapperInfoResolverTest : StringSpec({
     val logger = mockk<KSPLogger>(relaxed = true)
@@ -47,16 +48,26 @@ class AutoMapperInfoResolverTest : StringSpec({
         val classDeclaration = mockk<KSClassDeclaration>()
         val mappingAnnotationOne = mockk<KSAnnotation>()
         val mappingAnnotationTwo = mockk<KSAnnotation>()
-        val annotationName = mockk<KSName>()
+        val annotationKSName = mockk<KSName>()
+        val fullAnnotationKSName = mockk<KSName>()
 
         every {
-            annotationName.asString()
+            annotationKSName.asString()
         } returns annotationSimpleName
+
+        every {
+            fullAnnotationKSName.asString()
+        } returns annotationFullName
 
         every {
             mappingAnnotationOne.shortName
             mappingAnnotationTwo.shortName
-        } returns annotationName
+        } returns annotationKSName
+
+        every {
+            mappingAnnotationOne.annotationType.resolve().declaration.qualifiedName
+            mappingAnnotationTwo.annotationType.resolve().declaration.qualifiedName
+        } returns fullAnnotationKSName
 
         every {
             classDeclaration.annotations
@@ -69,14 +80,24 @@ class AutoMapperInfoResolverTest : StringSpec({
     "resolve should return correct AutoMapperInfo when only target argument present" {
         val classDeclaration = mockk<KSClassDeclaration>()
         val autoMapperAnnotation = mockk<KSAnnotation>()
-        val autoMapperAnnotationName = mockk<KSName>()
+        val autoMapperAnnotationKSName = mockk<KSName>()
+        val fullAutoMapperAnnotationKSName = mockk<KSName>()
 
         every {
             autoMapperAnnotation.shortName
-        } returns autoMapperAnnotationName
+        } returns autoMapperAnnotationKSName
 
         every {
-            autoMapperAnnotationName.asString()
+            autoMapperAnnotation.annotationType.resolve().declaration.qualifiedName
+        } returns fullAutoMapperAnnotationKSName
+
+        every {
+            fullAutoMapperAnnotationKSName.asString()
+        } returns annotationFullName
+
+
+        every {
+            autoMapperAnnotationKSName.asString()
         } returns annotationSimpleName
 
         every {
@@ -117,15 +138,32 @@ class AutoMapperInfoResolverTest : StringSpec({
     "resolve should return correct AutoMapperInfo" {
         val classDeclaration = mockk<KSClassDeclaration>()
         val autoMapperAnnotation = mockk<KSAnnotation>()
-        val autoMapperAnnotationName = mockk<KSName>()
+        val autoMapperAnnotationKSName = mockk<KSName>()
+        val fullAutoMapperAnnotationKSName = mockk<KSName>()
 
         every {
             autoMapperAnnotation.shortName
-        } returns autoMapperAnnotationName
+        } returns autoMapperAnnotationKSName
 
         every {
-            autoMapperAnnotationName.asString()
+            autoMapperAnnotationKSName.asString()
         } returns annotationSimpleName
+
+        every {
+            autoMapperAnnotation.annotationType.resolve().declaration.qualifiedName
+        } returns fullAutoMapperAnnotationKSName
+
+        every {
+            fullAutoMapperAnnotationKSName.asString()
+        } returns annotationFullName
+
+        every {
+            autoMapperAnnotation.annotationType.resolve().declaration.qualifiedName
+        } returns fullAutoMapperAnnotationKSName
+
+        every {
+            fullAutoMapperAnnotationKSName.asString()
+        } returns annotationFullName
 
         every {
             classDeclaration.annotations
@@ -227,15 +265,25 @@ class AutoMapperInfoResolverTest : StringSpec({
     "resolve should return correct AutoMapperInfo when target is empty in default" {
         val classDeclaration = mockk<KSClassDeclaration>()
         val autoMapperAnnotation = mockk<KSAnnotation>()
-        val autoMapperAnnotationName = mockk<KSName>()
+        val autoMapperAnnotationKSName = mockk<KSName>()
+        val fullAutoMapperAnnotationKSName = mockk<KSName>()
 
         every {
             autoMapperAnnotation.shortName
-        } returns autoMapperAnnotationName
+        } returns autoMapperAnnotationKSName
 
         every {
-            autoMapperAnnotationName.asString()
+            autoMapperAnnotationKSName.asString()
         } returns annotationSimpleName
+
+
+        every {
+            autoMapperAnnotation.annotationType.resolve().declaration.qualifiedName
+        } returns fullAutoMapperAnnotationKSName
+
+        every {
+            fullAutoMapperAnnotationKSName.asString()
+        } returns annotationFullName
 
         every {
             classDeclaration.annotations
@@ -312,15 +360,24 @@ class AutoMapperInfoResolverTest : StringSpec({
     "resolve should return correct AutoMapperInfo when code is empty in default" {
         val classDeclaration = mockk<KSClassDeclaration>()
         val autoMapperAnnotation = mockk<KSAnnotation>()
-        val autoMapperAnnotationName = mockk<KSName>()
+        val autoMapperAnnotationKSName = mockk<KSName>()
+        val fullAutoMapperAnnotationKSName = mockk<KSName>()
 
         every {
             autoMapperAnnotation.shortName
-        } returns autoMapperAnnotationName
+        } returns autoMapperAnnotationKSName
 
         every {
-            autoMapperAnnotationName.asString()
+            autoMapperAnnotationKSName.asString()
         } returns annotationSimpleName
+
+        every {
+            autoMapperAnnotation.annotationType.resolve().declaration.qualifiedName
+        } returns fullAutoMapperAnnotationKSName
+
+        every {
+            fullAutoMapperAnnotationKSName.asString()
+        } returns annotationFullName
 
         every {
             classDeclaration.annotations

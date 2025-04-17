@@ -5,23 +5,22 @@ import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.KSClassDeclaration
-import io.github.rmorenko.automapper.annotations.Mapping
-import io.github.rmorenko.automapper.exceptions.AnnotationNotPresent
-import io.github.rmorenko.automapper.model.MappingInfo
-import io.github.rmorenko.automapper.resolvers.AutoMapperInfoResolver
-import io.github.rmorenko.automapper.resolvers.MappingInfoResolver
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.ksp.toClassName
 import com.squareup.kotlinpoet.ksp.writeTo
+import io.github.rmorenko.automapper.annotations.Mapping
+import io.github.rmorenko.automapper.exceptions.AnnotationNotPresent
+import io.github.rmorenko.automapper.model.MappingInfo
+import io.github.rmorenko.automapper.resolvers.AutoMapperInfoResolver
+import io.github.rmorenko.automapper.resolvers.MappingInfoResolver
 
 /**
  * Class responsible for generating mapping function for data classes.
  *
  * @property logger Logger for logging information during code generation.
  */
-
 class MappingFunctionGenerator(private val logger: KSPLogger) {
 
     private val autoMapperInfoResolver = AutoMapperInfoResolver(logger)
@@ -35,25 +34,19 @@ class MappingFunctionGenerator(private val logger: KSPLogger) {
      * @param classDeclaration The class declaration to generate the mapping function for.
      * @param resolver The resolver to use for resolving symbols.
      * @param codeGenerator The code generator to use for generating the mapping function.
-     * @param processedClasses A set of class names that have already been processed.
      */
     fun generate(
         classDeclaration: KSClassDeclaration,
         resolver: Resolver,
-        codeGenerator: CodeGenerator,
-        processedClasses: MutableSet<String>
+        codeGenerator: CodeGenerator
     ) {
         val sourcePackageName = classDeclaration.packageName.asString()
         val sourceClassName = classDeclaration.simpleName.asString()
 
-        val qualifiedName = "$sourcePackageName.$sourceClassName"
-
-        if (processedClasses.contains(qualifiedName)) return
-        processedClasses.add("$sourcePackageName.$sourceClassName")
         val autoMapperInfo = try {
             autoMapperInfoResolver.resolve(classDeclaration)
         } catch (e: AnnotationNotPresent) {
-            logger.exception(e)
+            logger.info(e.message.toString())
             return
         }
         val functionName = "map${sourceClassName}To${autoMapperInfo.targetName}"

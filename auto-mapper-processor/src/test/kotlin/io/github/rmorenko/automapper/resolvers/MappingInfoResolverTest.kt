@@ -17,6 +17,7 @@ import io.mockk.every
 import io.mockk.mockk
 
 private val annotationSimpleName =  Mapping::class.simpleName.toString()
+private val annotationFullName =  Mapping::class.qualifiedName.toString()
 
 class MappingInfoResolverTest : StringSpec({
     val logger = mockk<KSPLogger>(relaxed = true)
@@ -147,10 +148,11 @@ class MappingInfoResolverTest : StringSpec({
             classDeclaration.getAllProperties()
         } returns propertyDeclarations
 
-        val mappingAnnotationName = mockk<KSName>()
+        val mappingAnnotationKSName = mockk<KSName>()
+        val fullMappingAnnotationKSName = mockk<KSName>()
 
         every {
-            mappingAnnotationName.asString()
+            mappingAnnotationKSName.asString()
         } returns annotationSimpleName
 
         every {
@@ -160,7 +162,15 @@ class MappingInfoResolverTest : StringSpec({
 
         every {
             mappingAnnotation.shortName
-        } returns mappingAnnotationName
+        } returns mappingAnnotationKSName
+
+        every {
+            fullMappingAnnotationKSName.asString()
+        } returns annotationFullName
+
+        every {
+            mappingAnnotation.annotationType.resolve().declaration.qualifiedName
+        } returns fullMappingAnnotationKSName
 
         val arguments = listOf(
             mockk<KSValueArgument>{
@@ -226,10 +236,11 @@ class MappingInfoResolverTest : StringSpec({
             classDeclaration.getAllProperties()
         } returns propertyDeclarations
 
-        val mappingAnnotationName = mockk<KSName>()
+        val mappingAnnotationKSName = mockk<KSName>()
+        val fullMappingAnnotationKSName = mockk<KSName>()
 
         every {
-            mappingAnnotationName.asString()
+            mappingAnnotationKSName.asString()
         } returns annotationSimpleName
 
         every {
@@ -239,7 +250,15 @@ class MappingInfoResolverTest : StringSpec({
 
         every {
             mappingAnnotation.shortName
-        } returns mappingAnnotationName
+        } returns mappingAnnotationKSName
+
+        every {
+            fullMappingAnnotationKSName.asString()
+        } returns annotationFullName
+
+        every {
+            mappingAnnotation.annotationType.resolve().declaration.qualifiedName
+        } returns fullMappingAnnotationKSName
 
         val arguments = listOf(
             mockk<KSValueArgument>{
@@ -304,10 +323,11 @@ class MappingInfoResolverTest : StringSpec({
             classDeclaration.getAllProperties()
         } returns propertyDeclarations
 
-        val mappingAnnotationName = mockk<KSName>()
+        val mappingAnnotationKSName = mockk<KSName>()
+        val fullMappingAnnotationKSName = mockk<KSName>()
 
         every {
-            mappingAnnotationName.asString()
+            mappingAnnotationKSName.asString()
         } returns annotationSimpleName
 
         every {
@@ -317,7 +337,16 @@ class MappingInfoResolverTest : StringSpec({
 
         every {
             mappingAnnotation.shortName
-        } returns mappingAnnotationName
+        } returns mappingAnnotationKSName
+
+
+        every {
+            fullMappingAnnotationKSName.asString()
+        } returns annotationFullName
+
+        every {
+            mappingAnnotation.annotationType.resolve().declaration.qualifiedName
+        } returns fullMappingAnnotationKSName
 
         val arguments = listOf(
             mockk<KSValueArgument>{
@@ -383,10 +412,11 @@ class MappingInfoResolverTest : StringSpec({
             classDeclaration.getAllProperties()
         } returns propertyDeclarations
 
-        val mappingAnnotationName = mockk<KSName>()
+        val mappingAnnotationKSName = mockk<KSName>()
+        val fullMappingAnnotationKSName = mockk<KSName>()
 
         every {
-            mappingAnnotationName.asString()
+            mappingAnnotationKSName.asString()
         } returns annotationSimpleName
 
         every {
@@ -396,7 +426,15 @@ class MappingInfoResolverTest : StringSpec({
 
         every {
             mappingAnnotation.shortName
-        } returns mappingAnnotationName
+        } returns mappingAnnotationKSName
+
+        every {
+            fullMappingAnnotationKSName.asString()
+        } returns annotationFullName
+
+        every {
+            mappingAnnotation.annotationType.resolve().declaration.qualifiedName
+        } returns fullMappingAnnotationKSName
 
         val arguments = listOf(
             mockk<KSValueArgument>{
@@ -462,10 +500,11 @@ class MappingInfoResolverTest : StringSpec({
             classDeclaration.getAllProperties()
         } returns propertyDeclarations
 
-        val mappingAnnotationName = mockk<KSName>()
+        val mappingAnnotationKSName = mockk<KSName>()
+        val fullMappingAnnotationKSName = mockk<KSName>()
 
         every {
-            mappingAnnotationName.asString()
+            mappingAnnotationKSName.asString()
         } returns annotationSimpleName
 
         every {
@@ -475,7 +514,15 @@ class MappingInfoResolverTest : StringSpec({
 
         every {
             mappingAnnotation.shortName
-        } returns mappingAnnotationName
+        } returns mappingAnnotationKSName
+
+        every {
+            fullMappingAnnotationKSName.asString()
+        } returns annotationFullName
+
+        every {
+            mappingAnnotation.annotationType.resolve().declaration.qualifiedName
+        } returns fullMappingAnnotationKSName
 
         val arguments = listOf(
             mockk<KSValueArgument>{
@@ -541,10 +588,11 @@ class MappingInfoResolverTest : StringSpec({
             classDeclaration.getAllProperties()
         } returns propertyDeclarations
 
-        val mappingAnnotationName = mockk<KSName>()
+        val mappingAnnotationKSName = mockk<KSName>()
+        val fullMappingAnnotationKSName = mockk<KSName>()
 
         every {
-            mappingAnnotationName.asString()
+            mappingAnnotationKSName.asString()
         } returns annotationSimpleName
 
         every {
@@ -554,7 +602,15 @@ class MappingInfoResolverTest : StringSpec({
 
         every {
             mappingAnnotation.shortName
-        } returns mappingAnnotationName
+        } returns mappingAnnotationKSName
+
+        every {
+            fullMappingAnnotationKSName.asString()
+        } returns annotationFullName
+
+        every {
+            mappingAnnotation.annotationType.resolve().declaration.qualifiedName
+        } returns fullMappingAnnotationKSName
 
         val arguments = listOf(
             mockk<KSValueArgument>{

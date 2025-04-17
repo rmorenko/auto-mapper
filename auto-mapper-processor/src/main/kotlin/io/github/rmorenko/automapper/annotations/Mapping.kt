@@ -2,7 +2,7 @@ package io.github.rmorenko.automapper.annotations
 
 
 /**
- * Annotation for mapping properties.
+ * Annotation used with `@AutoMapper` for mapping properties configuration.
  *
  * @property target The target property name.
  * @property transform The function call with target property or code execution result.

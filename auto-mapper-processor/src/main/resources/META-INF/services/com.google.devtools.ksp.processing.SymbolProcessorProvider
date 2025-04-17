@@ -1,1 +1,2 @@
 io.github.rmorenko.automapper.AutoMapperProcessorProvider
+io.github.rmorenko.automapper.GenerateTargetProcessorProvider

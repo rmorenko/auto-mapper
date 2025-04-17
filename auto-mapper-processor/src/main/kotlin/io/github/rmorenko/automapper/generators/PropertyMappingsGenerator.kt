@@ -4,7 +4,7 @@ import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import io.github.rmorenko.automapper.annotations.AutoMapper
-import io.github.rmorenko.automapper.getAnnotation
+import io.github.rmorenko.automapper.getFirstAnnotation
 import io.github.rmorenko.automapper.getAnnotationArgumentValue
 import io.github.rmorenko.automapper.model.AutoMapperInfo
 import io.github.rmorenko.automapper.model.DefaultInfo
@@ -45,7 +45,7 @@ class PropertyMappingsGenerator(private val logger: KSPLogger) {
 
                 val mappingInfo = mappings[propName]
                 val targetName = (propType.declaration as? KSClassDeclaration)?.let { classDecl ->
-                    val mappedType = classDecl.getAnnotation(AutoMapper::class)?.arguments
+                    val mappedType = classDecl.getFirstAnnotation(AutoMapper::class)?.arguments
                         ?.getAnnotationArgumentValue<KSType>(
                             "target"
                         )
