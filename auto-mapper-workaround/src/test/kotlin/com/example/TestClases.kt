@@ -8,6 +8,7 @@ import io.github.rmorenko.automapper.annotations.Default
 import io.github.rmorenko.automapper.annotations.GenerateTarget
 import io.github.rmorenko.automapper.annotations.GenerateTargetPropertyType
 import io.github.rmorenko.automapper.annotations.Mapping
+import io.github.rmorenko.automapper.annotations.TargetPropertyExclude
 
 @AutoMapper(
     target = Entity::class,
@@ -49,6 +50,7 @@ fun Int.multiply() = this * 2
 
 @GenerateTarget(pkg = "com.example", name = "PersonDto")
 data class Person(val name: String,
+                  @TargetPropertyExclude
                   val age: Int,
                   @GenerateTargetPropertyType(pkg = "com.example.address", className = "AddressDto")
                   val address: Address)

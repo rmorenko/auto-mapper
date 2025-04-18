@@ -2,6 +2,7 @@ package io.github.rmorenko.automapper.resolvers
 
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import io.github.rmorenko.automapper.annotations.AddTargetProperty
 import io.github.rmorenko.automapper.annotations.GenerateTargetPropertyType
 import io.github.rmorenko.automapper.exceptions.MultiplyAnnotationException
@@ -17,32 +18,35 @@ class TargetPropertiesInfoResolver(private val logger: KSPLogger) {
         val properties = classDeclaration.getAllProperties().filter {
             !excludeResolver.resolve(it)
         }.map { propertyDeclaration ->
-            logger.info("Processing declaration type: ${propertyDeclaration.type.resolve()}")
-            val generateTargetPropertyTypeAnnotations = propertyDeclaration.getAnnotations(
-                GenerateTargetPropertyType::class
-            )
-                .toList()
-            if (generateTargetPropertyTypeAnnotations.size > 1) {
-                throw MultiplyAnnotationException(GenerateTargetPropertyType::class)
-            }
-            generateTargetPropertyTypeAnnotations.firstOrNull()?.let { ksAnnotation ->
-                TargetPropertyInfo(
-                    name = propertyDeclaration.simpleName.asString(),
-                    pkg = ksAnnotation.arguments.getRequiredAnnotationArgumentValue<String>("pkg"),
-                    className = ksAnnotation.arguments.getRequiredAnnotationArgumentValue<String>("className")
-                )
-
-            } ?: TargetPropertyInfo(
+            resolveTargetPropertyInfo(propertyDeclaration) ?: TargetPropertyInfo(
                 name = propertyDeclaration.simpleName.asString(),
                 pkg = propertyDeclaration.type.resolve().declaration.packageName.asString(),
                 className = propertyDeclaration.type.resolve().declaration.simpleName.asString()
             )
         }.toMutableList()
-        properties.addAll(resolveAdditionalProperties(classDeclaration))
+        properties.addAll(resolveAdditionalTargetPropertyInfos(classDeclaration))
         return properties.toList()
     }
 
-    private fun resolveAdditionalProperties(classDeclaration: KSClassDeclaration): List<TargetPropertyInfo> {
+    private fun resolveTargetPropertyInfo(propertyDeclaration: KSPropertyDeclaration): TargetPropertyInfo? {
+        logger.info("Processing declaration type: ${propertyDeclaration.type.resolve()}")
+        val generateTargetPropertyTypeAnnotations = propertyDeclaration.getAnnotations(
+            GenerateTargetPropertyType::class
+        )
+            .toList()
+        if (generateTargetPropertyTypeAnnotations.size > 1) {
+            throw MultiplyAnnotationException(GenerateTargetPropertyType::class)
+        }
+        return generateTargetPropertyTypeAnnotations.firstOrNull()?.let { ksAnnotation ->
+            TargetPropertyInfo(
+                name = propertyDeclaration.simpleName.asString(),
+                pkg = ksAnnotation.arguments.getRequiredAnnotationArgumentValue<String>("pkg"),
+                className = ksAnnotation.arguments.getRequiredAnnotationArgumentValue<String>("className")
+            )
+        }
+    }
+
+    private fun resolveAdditionalTargetPropertyInfos(classDeclaration: KSClassDeclaration): List<TargetPropertyInfo> {
         return classDeclaration.getAllProperties().map { property ->
             val name = property.simpleName.asString()
             val addTargetPropertyAnnotations = property.getAnnotations(AddTargetProperty::class)
