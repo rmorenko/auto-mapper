@@ -3,16 +3,14 @@ package io.github.rmorenko.automapper.generators
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.processing.KSPLogger
-import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.ksp.toClassName
 import com.squareup.kotlinpoet.ksp.writeTo
-import io.github.rmorenko.automapper.annotations.Mapping
 import io.github.rmorenko.automapper.exceptions.AnnotationNotPresent
-import io.github.rmorenko.automapper.model.MappingInfo
+import io.github.rmorenko.automapper.model.AutoMapperInfo
 import io.github.rmorenko.automapper.resolvers.AutoMapperInfoResolver
 import io.github.rmorenko.automapper.resolvers.MappingInfoResolver
 
@@ -32,12 +30,10 @@ class MappingFunctionGenerator(private val logger: KSPLogger) {
      * Generates a mapping function for the given class declaration.
      *
      * @param classDeclaration The class declaration to generate the mapping function for.
-     * @param resolver The resolver to use for resolving symbols.
      * @param codeGenerator The code generator to use for generating the mapping function.
      */
     fun generate(
         classDeclaration: KSClassDeclaration,
-        resolver: Resolver,
         codeGenerator: CodeGenerator
     ) {
         val sourcePackageName = classDeclaration.packageName.asString()
@@ -67,29 +63,17 @@ class MappingFunctionGenerator(private val logger: KSPLogger) {
         functionBuilder.addStatement("return ${autoMapperInfo.targetName}(\n$propertyMappings\n    )")
 
         val fileBuilder = FileSpec.builder(sourcePackageName, fileName)
-        addImports(mappings, resolver, fileBuilder, autoMapperInfo.additionalImports)
+        addImports(fileBuilder, autoMapperInfo)
 
         val file = fileBuilder.addFunction(functionBuilder.build()).build()
         file.writeTo(codeGenerator, Dependencies.ALL_FILES)
     }
 
     private fun addImports(
-        mappings: Map<String, MappingInfo>,
-        resolver: Resolver,
         fileBuilder: FileSpec.Builder,
-        additionalImports: Set<String>
+        autoMapperInfo: AutoMapperInfo
     ) {
-        val extensionPackages = resolver.getSymbolsWithAnnotation(Mapping::class.simpleName.toString())
-            .filterIsInstance<KSClassDeclaration>()
-            .map { it.packageName.asString() }
-            .toSet()
-        mappings.keys.forEach { funcName ->
-            extensionPackages.forEach { extPackage ->
-                fileBuilder.addImport(extPackage, funcName)
-            }
-        }
-
-        additionalImports.forEach {
+        autoMapperInfo.additionalImports.forEach {
             fileBuilder.addImport(it, "")
         }
     }

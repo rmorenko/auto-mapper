@@ -14,8 +14,19 @@ import io.github.rmorenko.automapper.getRequiredAnnotationArgumentValue
 import io.github.rmorenko.automapper.model.AutoMapperInfo
 import io.github.rmorenko.automapper.model.toDefaultInfo
 
+/**
+ * Class responsible for resolving information from `@AutoMapper` annotation and
+ * class declaration.
+ *
+ * @property logger Logger for logging information during the resolution process.
+ */
 class AutoMapperInfoResolver(private val logger: KSPLogger) {
 
+    /**
+     * Resolves information from `@AutoMapper` annotation.
+     * @param classDeclaration The class declaration to generate target class.
+     * @return data from `@AutoMapper` annotation.
+     */
     fun resolve(classDeclaration: KSClassDeclaration): AutoMapperInfo {
         val annotations = getValidAnnotations(classDeclaration)
         val arguments = annotations.first().arguments.ifEmpty {
@@ -36,12 +47,13 @@ class AutoMapperInfoResolver(private val logger: KSPLogger) {
         val excludes = arguments.getAnnotationArgumentValue<ArrayList<String>>("exclude")?.toSet().orEmpty()
         logger.info("Excludes: $excludes")
 
-        val sourcePackage = targetType.declaration.packageName.asString()
-        val sourceName = targetType.declaration.simpleName.asString()
+        val targetPackage = targetType.declaration.packageName.asString()
+        val targetName = targetType.declaration.simpleName.asString()
+
 
         return AutoMapperInfo(
-            targetPackage = sourcePackage,
-            targetName = sourceName,
+            targetPackage = targetPackage,
+            targetName = targetName,
             additionalImports = additionalImports,
             defaults = defaults,
             excludes = excludes

@@ -1,19 +1,35 @@
 package io.github.rmorenko.automapper.resolvers
 
 import com.google.devtools.ksp.processing.KSPLogger
+import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import io.github.rmorenko.automapper.annotations.AddTargetProperty
+import io.github.rmorenko.automapper.annotations.GenerateTarget
 import io.github.rmorenko.automapper.annotations.GenerateTargetPropertyType
+import io.github.rmorenko.automapper.exceptions.AnnotationArgumentNotPresent
+import io.github.rmorenko.automapper.exceptions.AnnotationNotPresent
 import io.github.rmorenko.automapper.exceptions.MultiplyAnnotationException
+import io.github.rmorenko.automapper.getAnnotationArgumentValue
+import io.github.rmorenko.automapper.getAnnotationProperty
 import io.github.rmorenko.automapper.getAnnotations
 import io.github.rmorenko.automapper.getRequiredAnnotationArgumentValue
 import io.github.rmorenko.automapper.model.TargetPropertyInfo
 
+/**
+ * Class responsible for resolving information about properties for generated target class.
+ *
+ * @property logger Logger for logging information during the resolution process.
+ */
 class TargetPropertiesInfoResolver(private val logger: KSPLogger) {
 
     private val excludeResolver: TargetPropertyExcludeResolver = TargetPropertyExcludeResolver(logger)
 
+    /**
+     * Resolves information about properties for generated target class
+     * @param classDeclaration The class declaration of source class.
+     * @return list of TargetPropertyInfo
+     */
     fun resolve(classDeclaration: KSClassDeclaration): List<TargetPropertyInfo> {
         val properties = classDeclaration.getAllProperties().filter {
             !excludeResolver.resolve(it)
@@ -47,21 +63,17 @@ class TargetPropertiesInfoResolver(private val logger: KSPLogger) {
     }
 
     private fun resolveAdditionalTargetPropertyInfos(classDeclaration: KSClassDeclaration): List<TargetPropertyInfo> {
-        return classDeclaration.getAllProperties().map { property ->
-            val name = property.simpleName.asString()
-            val addTargetPropertyAnnotations = property.getAnnotations(AddTargetProperty::class)
-                .toList()
-            if (addTargetPropertyAnnotations.size > 1) {
-                throw MultiplyAnnotationException(AddTargetProperty::class)
-            }
-            addTargetPropertyAnnotations.firstOrNull()?.arguments?.let {
-                name to it
-            }
-        }.filterNotNull()
-            .map { pair ->
-            val name = pair.second.getRequiredAnnotationArgumentValue<String>("name")
-            val packageName = pair.second.getRequiredAnnotationArgumentValue<String>("pkg")
-            val className = pair.second.getRequiredAnnotationArgumentValue<String>("className")
+        val generateTargetAnnotations = classDeclaration.getAnnotations(GenerateTarget::class)
+        validate(generateTargetAnnotations)
+        val generateTargetAnnotation = generateTargetAnnotations.first()
+        return generateTargetAnnotation.arguments
+            .getAnnotationArgumentValue<ArrayList<KSAnnotation>>("props").orEmpty()
+            .map { annotation ->
+                val name = annotation.getAnnotationProperty("name")
+                    ?: throw AnnotationArgumentNotPresent(AddTargetProperty::class, "name")
+                val packageName = annotation.getAnnotationProperty("pkg") ?: classDeclaration.packageName.asString()
+                val className = annotation.getAnnotationProperty("className")
+                    ?: throw AnnotationArgumentNotPresent(AddTargetProperty::class, "className")
             TargetPropertyInfo(
                 name,
                 packageName,
@@ -70,5 +82,14 @@ class TargetPropertiesInfoResolver(private val logger: KSPLogger) {
                 logger.info("Resolved targetInfoProperty $it")
             }
         }.toList()
+    }
+
+    private fun validate(generateTargetAnnotations: List<KSAnnotation>) {
+        if (generateTargetAnnotations.isEmpty()) {
+            throw AnnotationNotPresent(GenerateTarget::class)
+        }
+        if (generateTargetAnnotations.size > 1) {
+            throw MultiplyAnnotationException(GenerateTarget::class)
+        }
     }
 }

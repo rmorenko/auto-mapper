@@ -31,7 +31,7 @@ class GenerateTargetInfoResolverTest : StringSpec({
         }
     }
 
-    "resolve should failed when multiply GenerateTarget no annotations not present" {
+    "resolve should failed when multiply GenerateTarget no annotations" {
         val classDeclaration = mockk<KSClassDeclaration> {
             every {
                 annotations
@@ -135,7 +135,7 @@ class GenerateTargetInfoResolverTest : StringSpec({
 
     }
 
-    "resolve should return correct result wit empty pkg value in  GenerateTarget annotation" {
+    "resolve should return correct result wit empty pkg value in GenerateTarget annotation" {
         val classDeclaration = mockk<KSClassDeclaration> {
             every {
                 packageName.asString()

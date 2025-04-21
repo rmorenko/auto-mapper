@@ -12,10 +12,21 @@ import io.github.rmorenko.automapper.getAnnotations
 import io.github.rmorenko.automapper.getRequiredAnnotationArgumentValue
 import io.github.rmorenko.automapper.model.GenerateTargetInfo
 
+/**
+ * Class responsible for resolving information from `@GenerateTarget` annotation and
+ * class declaration.
+ *
+ * @property logger Logger for logging information during the resolution process.
+ */
 class GenerateTargetInfoResolver(private val logger: KSPLogger) {
 
     private val targetPropertiesInfoResolver = TargetPropertiesInfoResolver(logger)
 
+    /**
+     * Resolve information from `@GenerateTarget` annotation.
+     * @param classDeclaration The class declaration of source class.
+     * @return information from `@GenerateTarget` annotation.
+     */
     fun resolve(classDeclaration: KSClassDeclaration): GenerateTargetInfo {
         val annotations = getValidAnnotations(classDeclaration)
         val arguments = annotations.first().arguments.ifEmpty {

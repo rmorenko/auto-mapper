@@ -3,16 +3,11 @@ package io.github.rmorenko.automapper.generators
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.processing.KSPLogger
-import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.ClassKind
-import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSName
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
-import com.squareup.kotlinpoet.ClassName
-import com.squareup.kotlinpoet.ksp.toClassName
-import io.github.rmorenko.automapper.annotations.Mapping
 import io.github.rmorenko.automapper.exceptions.AnnotationNotPresent
 import io.github.rmorenko.automapper.exceptions.MultiplyAnnotationException
 import io.github.rmorenko.automapper.model.AutoMapperInfo
@@ -23,7 +18,7 @@ import io.github.rmorenko.automapper.resolvers.MappingInfoResolver
 import io.github.rmorenko.automapper.setPrivateField
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
-import io.mockk.InternalPlatformDsl.toStr
+import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -36,7 +31,6 @@ class MappingFunctionGeneratorTest  : StringSpec({
     val logger = mockk<KSPLogger>(relaxed = true)
 
     "should not generate code when AutoMapper annotation not present" {
-
         val autoMapperInfoResolver = mockk<AutoMapperInfoResolver>()
         val mappingInfoResolver = mockk<MappingInfoResolver>()
         val propertyMappingsGenerator = mockk<PropertyMappingsGenerator>()
@@ -55,9 +49,9 @@ class MappingFunctionGeneratorTest  : StringSpec({
             autoMapperInfoResolver.resolve(ksClassDeclaration)
         } throws AnnotationNotPresent(String::class)
 
-        val resolver = mockk<Resolver>()
+
         val codeGenerator = mockk<CodeGenerator>()
-        mappingFunctionGenerator.generate(ksClassDeclaration, resolver, codeGenerator)
+        mappingFunctionGenerator.generate(ksClassDeclaration, codeGenerator)
         verify (exactly = 0) {
             mappingInfoResolver.resolve(ksClassDeclaration)
             propertyMappingsGenerator.generate(ksClassDeclaration, any(), any())
@@ -81,10 +75,10 @@ class MappingFunctionGeneratorTest  : StringSpec({
             autoMapperInfoResolver.resolve(ksClassDeclaration)
         } throws MultiplyAnnotationException(String::class)
 
-        val resolver = mockk<Resolver>()
+
         val codeGenerator = mockk<CodeGenerator>()
         shouldThrow<MultiplyAnnotationException> {
-            mappingFunctionGenerator.generate(ksClassDeclaration, resolver, codeGenerator)
+            mappingFunctionGenerator.generate(ksClassDeclaration, codeGenerator)
         }
     }
 
@@ -136,6 +130,7 @@ class MappingFunctionGeneratorTest  : StringSpec({
             defaults = setOf(
                 DefaultInfo("propertyDefault", "default code")
             ),
+            additionalImports = setOf("com.example.additional"),
             excludes = setOf("propertyExcludes")
         )
 
@@ -154,19 +149,6 @@ class MappingFunctionGeneratorTest  : StringSpec({
             mappingInfoResolver.resolve(ksClassDeclaration)
         } returns mappings
 
-        val resolver = mockk<Resolver>  {
-            every {
-                getSymbolsWithAnnotation(Mapping::class.simpleName.toString())
-            } returns listOf(
-                mockk<KSAnnotated> {
-                    every {
-
-                    }
-                }
-
-            ).asSequence()
-        }
-
         val outputStream = ByteArrayOutputStream()
         val codeGenerator = mockk<CodeGenerator> {
             every {
@@ -178,7 +160,16 @@ class MappingFunctionGeneratorTest  : StringSpec({
             propertyMappingsGenerator.generate(ksClassDeclaration, mappings, autoMapperInfo)
         } returns "generated code"
         mappingFunctionGenerator.setPrivateField("propertyMappingsGenerator", propertyMappingsGenerator)
-        mappingFunctionGenerator.generate(ksClassDeclaration, resolver, codeGenerator)
-        println(outputStream.toString(Charset.defaultCharset()))
+        mappingFunctionGenerator.generate(ksClassDeclaration, codeGenerator)
+        outputStream.toString(Charset.defaultCharset()).trimIndent() shouldBe """
+            package com.example
+
+            import com.example.additional
+            import com.example.target.TargetClass
+
+            public fun SourceClass.mapToTargetClass(): TargetClass = TargetClass(
+            generated code
+                )
+        """.trimIndent()
     }
 })

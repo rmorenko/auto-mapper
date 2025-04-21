@@ -50,7 +50,7 @@ class AutoMapperProcessorTest : StringSpec({
         } returns "com.example"
 
         every {
-            mappingFunctionGenerator.generate(ksClassDeclaration, resolver, codeGenerator)
+            mappingFunctionGenerator.generate(ksClassDeclaration, codeGenerator)
         } returns Unit
 
         every {

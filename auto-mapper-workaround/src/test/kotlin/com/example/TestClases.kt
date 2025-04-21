@@ -1,8 +1,10 @@
 package com.example
 
 import com.example.address.Address
+import com.example.common.Common
 import com.example.entity.Entity
 import com.example.entity.NestedEntity
+import io.github.rmorenko.automapper.annotations.AddTargetProperty
 import io.github.rmorenko.automapper.annotations.AutoMapper
 import io.github.rmorenko.automapper.annotations.Default
 import io.github.rmorenko.automapper.annotations.GenerateTarget
@@ -29,7 +31,8 @@ data class EntityDto(
     val title: String,
     val summary: String,
     @Mapping(code = "", target = "desc")
-    val description: String
+    val description: String,
+    val common: Common
 )
 
 @AutoMapper(NestedEntity::class)
@@ -48,7 +51,8 @@ fun addPrefix(string: String): String {
 
 fun Int.multiply() = this * 2
 
-@GenerateTarget(pkg = "com.example", name = "PersonDto")
+@GenerateTarget(pkg = "com.example", name = "PersonDto",
+    props = [AddTargetProperty(name = "add", pkg = "kotlin", className = "String")])
 data class Person(val name: String,
                   @TargetPropertyExclude
                   val age: Int,

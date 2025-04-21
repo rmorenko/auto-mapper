@@ -22,7 +22,7 @@ class AutoMapperProcessor(private val codeGenerator: CodeGenerator, private val 
         val classDeclarations = resolver.getClassDeclarations(AutoMapper::class)
         logger.info("Found annotated AutoMapper classes: ${classDeclarations.map { it.simpleName.asString() }}")
         classDeclarations.forEach { classDeclaration ->
-            mappingFunctionGenerator.generate(classDeclaration, resolver, codeGenerator)
+            mappingFunctionGenerator.generate(classDeclaration, codeGenerator)
         }
         return emptyList()
     }
