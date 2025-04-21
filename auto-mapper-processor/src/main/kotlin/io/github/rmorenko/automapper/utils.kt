@@ -47,9 +47,9 @@ fun KSClassDeclaration.getFirstAnnotation(annotationClass: KClass<*>): KSAnnotat
  * @return The list of `KSAnnotation` object representing the annotation, or null if not found.
  */
 fun KSClassDeclaration.getAnnotations(annotationClass: KClass<*>): List<KSAnnotation> {
-    return annotations.filter {
-        annotationClass.simpleName == it.shortName.asString() &&
-                it.annotationType.resolve().declaration.qualifiedName?.asString() ==
+    return annotations.filter { annotation ->
+        annotationClass.simpleName == annotation.shortName.asString() &&
+                annotation.annotationType.resolve().declaration.qualifiedName?.asString() ==
                 annotationClass.qualifiedName.toString()
     }.toList()
 }

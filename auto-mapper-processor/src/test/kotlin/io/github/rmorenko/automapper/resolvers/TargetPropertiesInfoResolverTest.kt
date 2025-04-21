@@ -8,6 +8,7 @@ import com.google.devtools.ksp.symbol.KSValueArgument
 import io.github.rmorenko.automapper.annotations.AddTargetProperty
 import io.github.rmorenko.automapper.annotations.GenerateTarget
 import io.github.rmorenko.automapper.annotations.GenerateTargetPropertyType
+import io.github.rmorenko.automapper.exceptions.AnnotationNotPresent
 import io.github.rmorenko.automapper.exceptions.MultiplyAnnotationException
 import io.github.rmorenko.automapper.setPrivateField
 import io.kotest.assertions.throwables.shouldThrow
@@ -20,7 +21,24 @@ class TargetPropertiesInfoResolverTest : StringSpec({
     val logger = mockk<KSPLogger>(relaxed = true)
     val targetPropertiesInfoResolver = TargetPropertiesInfoResolver(logger)
 
-    "resolve should return empty list if no properties in class declaration and empty props in GenerateTarget" {
+    "resolve should fail without GenerateTarget annotation" {
+        val targetPropertyExcludeResolver = mockk<TargetPropertyExcludeResolver>()
+        val klassDeclaration = mockk<KSClassDeclaration> {
+            every {
+                getAllProperties()
+            } returns emptyList<KSPropertyDeclaration>().asSequence()
+
+            every {
+                annotations
+            } returns emptyList<KSAnnotation>().asSequence()
+        }
+        targetPropertiesInfoResolver.setPrivateField("excludeResolver", targetPropertyExcludeResolver)
+        shouldThrow<AnnotationNotPresent> {
+            targetPropertiesInfoResolver.resolve(klassDeclaration)
+        }
+    }
+
+    "resolve should fail with multiply GenerateTarget annotation" {
         val targetPropertyExcludeResolver = mockk<TargetPropertyExcludeResolver>()
         val klassDeclaration = mockk<KSClassDeclaration> {
             every {
@@ -46,12 +64,96 @@ class TargetPropertiesInfoResolverTest : StringSpec({
                     every {
                         arguments
                     } returns emptyList()
+                },
+                mockk<KSAnnotation> {
+                    every {
+                        shortName.asString()
+                    } returns GenerateTarget::class.simpleName.toString()
+
+                    every {
+                        simpleName.asString()
+                    } returns GenerateTarget::class.simpleName.toString()
+
+                    every {
+                        annotationType.resolve().declaration.qualifiedName?.asString()
+                    } returns GenerateTarget::class.qualifiedName.toString()
+
+                    every {
+                        arguments
+                    } returns emptyList()
                 }
 
             ).asSequence()
         }
         targetPropertiesInfoResolver.setPrivateField("excludeResolver", targetPropertyExcludeResolver)
-        targetPropertiesInfoResolver.resolve(klassDeclaration)
+        shouldThrow<MultiplyAnnotationException> {
+            targetPropertiesInfoResolver.resolve(klassDeclaration)
+        }
+    }
+
+    "resolve should return empty list if no properties in class declaration and empty props in GenerateTarget" {
+        val targetPropertyExcludeResolver = mockk<TargetPropertyExcludeResolver>()
+        val generateTargetArguments = listOf(
+            mockk<KSValueArgument> {
+                every {
+                    name?.getShortName()
+                } returns "name"
+
+                every {
+                    value
+                } returns "TargetClass"
+            },
+
+            mockk<KSValueArgument> {
+                every {
+                    name?.getShortName()
+                } returns "pkg"
+
+                every {
+                    value
+                } returns "com.example"
+            },
+
+            mockk<KSValueArgument> {
+                every {
+                    name?.getShortName()
+                } returns "props"
+
+                every {
+                    value
+                } returns ArrayList<KSAnnotation>()
+            }
+        )
+        val klassDeclaration = mockk<KSClassDeclaration> {
+            every {
+                getAllProperties()
+            } returns emptyList<KSPropertyDeclaration>().asSequence()
+
+            every {
+                annotations
+            } returns listOf(
+                mockk<KSAnnotation> {
+                    every {
+                        shortName.asString()
+                    } returns GenerateTarget::class.simpleName.toString()
+
+                    every {
+                        simpleName.asString()
+                    } returns GenerateTarget::class.simpleName.toString()
+
+                    every {
+                        annotationType.resolve().declaration.qualifiedName?.asString()
+                    } returns GenerateTarget::class.qualifiedName.toString()
+
+                    every {
+                        arguments
+                    } returns generateTargetArguments
+                }
+
+            ).asSequence()
+        }
+        targetPropertiesInfoResolver.setPrivateField("excludeResolver", targetPropertyExcludeResolver)
+        targetPropertiesInfoResolver.resolve(klassDeclaration).size shouldBe 0
     }
 
     "resolve should failed if properties with multiply GenerateTargetPropertyType annotations" {
@@ -145,106 +247,71 @@ class TargetPropertiesInfoResolverTest : StringSpec({
         } returns false
 
         targetPropertiesInfoResolver.setPrivateField("excludeResolver", targetPropertyExcludeResolver)
+        val generateTargetArguments = listOf(
+            mockk<KSValueArgument> {
+                every {
+                    name?.getShortName()
+                } returns "name"
+
+                every {
+                    value
+                } returns "TargetClass"
+            },
+
+            mockk<KSValueArgument> {
+                every {
+                    name?.getShortName()
+                } returns "pkg"
+
+                every {
+                    value
+                } returns "com.example"
+            },
+
+            mockk<KSValueArgument> {
+                every {
+                    name?.getShortName()
+                } returns "props"
+
+                every {
+                    value
+                } returns ArrayList<KSAnnotation>()
+            }
+        )
         val klassDeclaration = mockk<KSClassDeclaration> {
             every {
                 getAllProperties()
             } returns listOf(
                 propertyOne
             ).asSequence()
-        }
-        shouldThrow<MultiplyAnnotationException> {
-            targetPropertiesInfoResolver.resolve(klassDeclaration)
-        }
-    }
-
-    "resolve should failed if properties with multiply AddTargetProperty annotations" {
-        val targetPropertyExcludeResolver = mockk<TargetPropertyExcludeResolver>()
-        val addTargetPropertyAnnotationOne  = mockk<KSAnnotation> {
-            every {
-                shortName.asString()
-            } returns AddTargetProperty::class.simpleName.toString()
-            every {
-                annotationType.resolve().declaration.qualifiedName?.asString()
-            } returns AddTargetProperty::class.qualifiedName.toString()
-
-        }
-        val addTargetPropertyAnnotationTwo  = mockk<KSAnnotation> {
-            every {
-                shortName.asString()
-            } returns AddTargetProperty::class.simpleName.toString()
-            every {
-                annotationType.resolve().declaration.qualifiedName?.asString()
-            } returns AddTargetProperty::class.qualifiedName.toString()
-
-        }
-        val generatedPropertyTypeAnnotationOne = mockk<KSAnnotation> {
-            every {
-                shortName.asString()
-            } returns GenerateTargetPropertyType::class.simpleName.toString()
-            every {
-                annotationType.resolve().declaration.qualifiedName?.asString()
-            } returns GenerateTargetPropertyType::class.qualifiedName.toString()
-
-            every {
-                arguments
-            } returns listOf(
-                mockk<KSValueArgument> {
-                    every {
-                        name?.getShortName()
-                    } returns "pkg"
-
-                    every {
-                        value
-                    } returns "com.example.other"
-
-                },
-                mockk<KSValueArgument> {
-                    every {
-                        name?.getShortName()
-                    } returns "className"
-
-                    every {
-                        value
-                    } returns "OtherProperty"
-                }
-            )
-        }
-
-        val propertyOne = mockk<KSPropertyDeclaration> {
-            every {
-                simpleName.asString()
-            } returns "propertyOne"
-
-            every {
-                type.resolve().declaration.packageName.asString()
-            } returns "com.example.one"
-
-            every {
-                type.resolve().declaration.simpleName.asString()
-            } returns "PropertyOne"
 
             every {
                 annotations
-            } returns listOf(generatedPropertyTypeAnnotationOne,
-                addTargetPropertyAnnotationOne,
-                addTargetPropertyAnnotationTwo).asSequence()
-        }
-        every {
-            targetPropertyExcludeResolver.resolve(propertyOne)
-        } returns false
-
-        targetPropertiesInfoResolver.setPrivateField("excludeResolver", targetPropertyExcludeResolver)
-        val klassDeclaration = mockk<KSClassDeclaration> {
-            every {
-                getAllProperties()
             } returns listOf(
-                propertyOne
+                mockk<KSAnnotation> {
+                    every {
+                        shortName.asString()
+                    } returns GenerateTarget::class.simpleName.toString()
+
+                    every {
+                        simpleName.asString()
+                    } returns GenerateTarget::class.simpleName.toString()
+
+                    every {
+                        annotationType.resolve().declaration.qualifiedName?.asString()
+                    } returns GenerateTarget::class.qualifiedName.toString()
+
+                    every {
+                        arguments
+                    } returns generateTargetArguments
+                }
             ).asSequence()
         }
         shouldThrow<MultiplyAnnotationException> {
             targetPropertiesInfoResolver.resolve(klassDeclaration)
         }
     }
+
 
     "resolve should return correct list if properties without annotations" {
         val targetPropertyExcludeResolver = mockk<TargetPropertyExcludeResolver>()
@@ -281,6 +348,37 @@ class TargetPropertiesInfoResolverTest : StringSpec({
                 annotations
             } returns emptyList<KSAnnotation>().asSequence()
         }
+        val generateTargetArguments = listOf(
+            mockk<KSValueArgument> {
+                every {
+                    name?.getShortName()
+                } returns "name"
+
+                every {
+                    value
+                } returns "TargetClass"
+            },
+
+            mockk<KSValueArgument> {
+                every {
+                    name?.getShortName()
+                } returns "pkg"
+
+                every {
+                    value
+                } returns "com.example"
+            },
+
+            mockk<KSValueArgument> {
+                every {
+                    name?.getShortName()
+                } returns "props"
+
+                every {
+                    value
+                } returns ArrayList<KSAnnotation>()
+            }
+        )
         val klassDeclaration = mockk<KSClassDeclaration> {
             every {
                 getAllProperties()
@@ -288,6 +386,28 @@ class TargetPropertiesInfoResolverTest : StringSpec({
                 propertyOne,
                 propertyTwo
             ).asSequence()
+            every {
+                annotations
+            } returns listOf(
+                mockk<KSAnnotation> {
+                    every {
+                        shortName.asString()
+                    } returns GenerateTarget::class.simpleName.toString()
+
+                    every {
+                        simpleName.asString()
+                    } returns GenerateTarget::class.simpleName.toString()
+
+                    every {
+                        annotationType.resolve().declaration.qualifiedName?.asString()
+                    } returns GenerateTarget::class.qualifiedName.toString()
+
+                    every {
+                        arguments
+                    } returns generateTargetArguments
+                }
+            ).asSequence()
+
         }
         every {
             targetPropertyExcludeResolver.resolve(propertyOne)
@@ -306,17 +426,8 @@ class TargetPropertiesInfoResolverTest : StringSpec({
     }
 
 
-    "resolve return correct list if property with GeneratedPropertyType and AddTargetProperty annotations" {
+    "resolve return correct list if property with GeneratedPropertyType and not empty props in GenerateTarget" {
         val targetPropertyExcludeResolver = mockk<TargetPropertyExcludeResolver>()
-        val addTargetPropertyAnnotationOne  = mockk<KSAnnotation> {
-            every {
-                shortName.asString()
-            } returns AddTargetProperty::class.simpleName.toString()
-            every {
-                annotationType.resolve().declaration.qualifiedName?.asString()
-            } returns AddTargetProperty::class.qualifiedName.toString()
-
-        }
         val propertyOne = mockk<KSPropertyDeclaration> {
             every {
                 simpleName.asString()
@@ -383,14 +494,112 @@ class TargetPropertiesInfoResolverTest : StringSpec({
 
             every {
                 annotations
-            } returns listOf(generatedPropertyTypeAnnotation, addTargetPropertyAnnotationOne).asSequence()
+            } returns listOf(generatedPropertyTypeAnnotation).asSequence()
         }
+        val generateTargetArguments = listOf(
+            mockk<KSValueArgument> {
+                every {
+                    name?.getShortName()
+                } returns "name"
+
+                every {
+                    value
+                } returns "TargetClass"
+            },
+
+            mockk<KSValueArgument> {
+                every {
+                    name?.getShortName()
+                } returns "pkg"
+
+                every {
+                    value
+                } returns "com.example"
+            },
+
+            mockk<KSValueArgument> {
+                every {
+                    name?.getShortName()
+                } returns "props"
+
+                every {
+                    value
+                } returns ArrayList<KSAnnotation>(
+                    listOf(
+                        mockk<KSAnnotation> {
+                            every {
+                                shortName.asString()
+                            } returns AddTargetProperty::class.simpleName.toString()
+
+                            every {
+                                annotationType.resolve().declaration.qualifiedName?.asString()
+                            } returns AddTargetProperty::class.qualifiedName.toString()
+
+                            every {
+                                arguments
+                            } returns listOf(
+                                mockk<KSValueArgument> {
+                                    every {
+                                        name?.getShortName()
+                                    } returns "pkg"
+
+                                    every {
+                                        value
+                                    } returns "com.example.additional"
+                                },
+                                mockk<KSValueArgument> {
+                                    every {
+                                        name?.getShortName()
+                                    } returns "name"
+
+                                    every {
+                                        value
+                                    } returns "additionalTarget"
+                                },
+                                mockk<KSValueArgument> {
+                                    every {
+                                        name?.getShortName()
+                                    } returns "className"
+
+                                    every {
+                                        value
+                                    } returns "AdditionalTargetClass"
+                                }
+
+                            )
+                        }
+                    )
+                )
+            }
+        )
         val klassDeclaration = mockk<KSClassDeclaration> {
             every {
                 getAllProperties()
             } returns listOf(
                 propertyOne,
                 propertyTwo
+            ).asSequence()
+
+            every {
+                annotations
+            } returns listOf(
+                mockk<KSAnnotation> {
+                    every {
+                        shortName.asString()
+                    } returns GenerateTarget::class.simpleName.toString()
+
+                    every {
+                        simpleName.asString()
+                    } returns GenerateTarget::class.simpleName.toString()
+
+                    every {
+                        annotationType.resolve().declaration.qualifiedName?.asString()
+                    } returns GenerateTarget::class.qualifiedName.toString()
+
+                    every {
+                        arguments
+                    } returns generateTargetArguments
+                }
             ).asSequence()
         }
         every {
@@ -402,7 +611,7 @@ class TargetPropertiesInfoResolverTest : StringSpec({
         } returns false
 
         targetPropertiesInfoResolver.setPrivateField("excludeResolver", targetPropertyExcludeResolver)
-        targetPropertiesInfoResolver.resolve(klassDeclaration).size shouldBe 2
+        targetPropertiesInfoResolver.resolve(klassDeclaration).size shouldBe 3
         var targetPropertyInfo = targetPropertiesInfoResolver.resolve(klassDeclaration).first()
         targetPropertyInfo.name shouldBe "propertyOne"
         targetPropertyInfo.pkg shouldBe "com.example.one"
@@ -412,6 +621,11 @@ class TargetPropertiesInfoResolverTest : StringSpec({
         targetPropertyInfo.name shouldBe "propertyOne"
         targetPropertyInfo.pkg shouldBe "com.example.other"
         targetPropertyInfo.className shouldBe "OtherProperty"
+
+        targetPropertyInfo = targetPropertiesInfoResolver.resolve(klassDeclaration)[2]
+        targetPropertyInfo.name shouldBe "additionalTarget"
+        targetPropertyInfo.pkg shouldBe "com.example.additional"
+        targetPropertyInfo.className shouldBe "AdditionalTargetClass"
     }
 
 })

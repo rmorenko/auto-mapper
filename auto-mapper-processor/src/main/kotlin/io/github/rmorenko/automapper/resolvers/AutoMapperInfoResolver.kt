@@ -33,7 +33,7 @@ class AutoMapperInfoResolver(private val logger: KSPLogger) {
             throw NoAnnotationArguments(AutoMapper::class)
         }
         logger.info("${AutoMapper::class.simpleName} arguments: $arguments")
-        val targetType = arguments.getRequiredAnnotationArgumentValue<KSType>("target")
+        val targetType = arguments.getAnnotationArgumentValue<KSType>("target")
         val defaults = arguments.getAnnotationArgumentValue<ArrayList<KSAnnotation>>("defaults")
             .orEmpty()
             .map(KSAnnotation::toDefaultInfo)
@@ -46,11 +46,19 @@ class AutoMapperInfoResolver(private val logger: KSPLogger) {
         logger.info("Additional imports: $additionalImports")
         val excludes = arguments.getAnnotationArgumentValue<ArrayList<String>>("exclude")?.toSet().orEmpty()
         logger.info("Excludes: $excludes")
+        val targetClassInfo = if (targetType!= null && targetType.declaration.qualifiedName?.asString()
+            != Unit::class.qualifiedName.toString()
+        ) {
+            targetType.declaration.packageName.asString() to targetType.declaration.simpleName.asString()
+        } else {
+            (arguments.getAnnotationArgumentValue<String>("targetPkg")?.ifEmpty {
+                classDeclaration.packageName.asString()
+            } ?: classDeclaration.packageName.asString()) to
+                    arguments.getRequiredAnnotationArgumentValue<String>("targetName")
 
-        val targetPackage = targetType.declaration.packageName.asString()
-        val targetName = targetType.declaration.simpleName.asString()
-
-
+        }
+        val targetPackage = targetClassInfo.first
+        val targetName = targetClassInfo.second
         return AutoMapperInfo(
             targetPackage = targetPackage,
             targetName = targetName,

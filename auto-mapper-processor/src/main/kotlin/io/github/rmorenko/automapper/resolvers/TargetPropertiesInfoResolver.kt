@@ -40,7 +40,9 @@ class TargetPropertiesInfoResolver(private val logger: KSPLogger) {
                 className = propertyDeclaration.type.resolve().declaration.simpleName.asString()
             )
         }.toMutableList()
-        properties.addAll(resolveAdditionalTargetPropertyInfos(classDeclaration))
+        val generateTargetAnnotations = classDeclaration.getAnnotations(GenerateTarget::class)
+        validate(generateTargetAnnotations)
+        properties.addAll(resolveAdditionalTargetPropertyInfos(classDeclaration, generateTargetAnnotations))
         return properties.toList()
     }
 
@@ -62,11 +64,11 @@ class TargetPropertiesInfoResolver(private val logger: KSPLogger) {
         }
     }
 
-    private fun resolveAdditionalTargetPropertyInfos(classDeclaration: KSClassDeclaration): List<TargetPropertyInfo> {
-        val generateTargetAnnotations = classDeclaration.getAnnotations(GenerateTarget::class)
-        validate(generateTargetAnnotations)
-        val generateTargetAnnotation = generateTargetAnnotations.first()
-        return generateTargetAnnotation.arguments
+    private fun resolveAdditionalTargetPropertyInfos(
+        classDeclaration: KSClassDeclaration,
+        generateTargetAnnotations: List<KSAnnotation>
+    ): List<TargetPropertyInfo> {
+        return generateTargetAnnotations.first().arguments
             .getAnnotationArgumentValue<ArrayList<KSAnnotation>>("props").orEmpty()
             .map { annotation ->
                 val name = annotation.getAnnotationProperty("name")
