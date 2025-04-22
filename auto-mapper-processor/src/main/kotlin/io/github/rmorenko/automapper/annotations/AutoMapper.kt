@@ -18,4 +18,3 @@ annotation class AutoMapper(
     val imports: Array<String> = [],
     vararg val exclude: String = []
 )
-

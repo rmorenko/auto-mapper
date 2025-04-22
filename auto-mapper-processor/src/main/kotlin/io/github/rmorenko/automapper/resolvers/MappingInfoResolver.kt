@@ -29,8 +29,9 @@ class MappingInfoResolver(private val logger: KSPLogger) {
                     throw MultiplyAnnotationException(Mapping::class)
                 }
                 val annotation = prop.annotations.firstOrNull {
-                    it.shortName.asString() ==
-                            Mapping::class.simpleName.toString()
+                    it.shortName.asString() == Mapping::class.simpleName.toString()
+                            && it.annotationType.resolve().declaration.qualifiedName?.asString() ==
+                            Mapping::class.qualifiedName
                 }
                 val arguments = annotation?.arguments.orEmpty()
                 prop to arguments
@@ -56,6 +57,8 @@ class MappingInfoResolver(private val logger: KSPLogger) {
                     isExtension = isExtension,
                     target = target
                 )
+            }.also {
+                logger.info("Mappings info for ${classDeclaration.qualifiedName?.asString()}: $it")
             }
     }
 }

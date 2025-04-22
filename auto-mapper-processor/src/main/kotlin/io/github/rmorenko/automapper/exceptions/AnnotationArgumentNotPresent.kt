@@ -9,4 +9,4 @@ import kotlin.reflect.KClass
  * @param argumentName The name of the missing argument.
  */
 class AnnotationArgumentNotPresent(annotation: KClass<*>, argumentName: String) :
-    RuntimeException("Annotation argument ${annotation.simpleName} not present in $argumentName")
+    RuntimeException("Annotation argument $argumentName not present in ${annotation.simpleName}")

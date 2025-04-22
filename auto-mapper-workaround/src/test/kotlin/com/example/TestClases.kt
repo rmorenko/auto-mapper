@@ -1,5 +1,8 @@
 package com.example
 
+import com.example.common.Common
+import com.example.entity.Entity
+import com.example.entity.NestedEntity
 import io.github.rmorenko.automapper.annotations.AutoMapper
 import io.github.rmorenko.automapper.annotations.Default
 import io.github.rmorenko.automapper.annotations.Mapping
@@ -10,7 +13,7 @@ import io.github.rmorenko.automapper.annotations.Mapping
     imports = ["kotlin.collections.List", "kotlin.collections.Set"],
     exclude = ["summary"]
 )
-data class Dto(
+data class EntityDto(
     @Mapping(transform = "Int.multiply")
     val id: Int,
     @Mapping(transform = "addPrefix")
@@ -23,7 +26,8 @@ data class Dto(
     val title: String,
     val summary: String,
     @Mapping(code = "", target = "desc")
-    val description: String
+    val description: String,
+    val common: Common
 )
 
 @AutoMapper(NestedEntity::class)
@@ -32,18 +36,6 @@ data class NestedDto(
     val code: String
 )
 
-data class Entity(
-    val id: Int,
-    val name: String,
-    val status: String,
-    val nested: NestedEntity,
-    val summary: String? = null,
-    val someAge: String,
-    val desc: String,
-    val box: Box
-)
-
-data class NestedEntity(val code: String)
 
 data class Box(val height: Int, val width: Int)
 
@@ -53,4 +45,3 @@ fun addPrefix(string: String): String {
 }
 
 fun Int.multiply() = this * 2
-

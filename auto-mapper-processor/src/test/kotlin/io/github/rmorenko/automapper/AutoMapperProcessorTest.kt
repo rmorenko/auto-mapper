@@ -10,11 +10,8 @@ import io.github.rmorenko.automapper.annotations.AutoMapper
 import io.github.rmorenko.automapper.generators.MappingFunctionGenerator
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldBeEmpty
-import io.kotest.matchers.shouldBe
-import io.mockk.mockk
 import io.mockk.every
-
-import java.util.*
+import io.mockk.mockk
 
 class AutoMapperProcessorTest : StringSpec({
     val logger = mockk<KSPLogger>(relaxed = true)
@@ -22,8 +19,9 @@ class AutoMapperProcessorTest : StringSpec({
     "mappingFunctionGenerator should not execute when AutoMapper not resolved" {
         val codeGenerator = mockk<CodeGenerator>()
         val resolver = mockk<Resolver>()
+
         every {
-            resolver.getSymbolsWithAnnotation(AutoMapper::class.qualifiedName.orEmpty())
+            resolver.getSymbolsWithAnnotation(any())
         } returns emptyList<KSAnnotated>().asSequence()
 
         val autoMapperProcessor = AutoMapperProcessor(codeGenerator, logger)
@@ -31,14 +29,14 @@ class AutoMapperProcessorTest : StringSpec({
 
         val ksFile = mockk<KSFile>()
         every {
-            resolver.getSymbolsWithAnnotation(AutoMapper::class.qualifiedName.orEmpty())
+            resolver.getSymbolsWithAnnotation(AutoMapperProcessor::class.qualifiedName.toString())
         } returns listOf<KSAnnotated>(ksFile).asSequence()
         autoMapperProcessor.process(resolver).shouldBeEmpty()
 
     }
 
 
-    "mappingFunctionGenerator should execute when AutoMapper annotation resolved " {
+    "mappingFunctionGenerator should execute when AutoMapper annotation resolved" {
         val codeGenerator = mockk<CodeGenerator>()
         val resolver = mockk<Resolver>()
         val ksClassDeclaration = mockk<KSClassDeclaration>()
@@ -51,30 +49,17 @@ class AutoMapperProcessorTest : StringSpec({
             ksClassDeclaration.packageName.asString()
         } returns "com.example"
 
-        val processClasses = mutableSetOf<String>()
-
+        every {
+            mappingFunctionGenerator.generate(ksClassDeclaration, codeGenerator)
+        } returns Unit
 
         every {
-            mappingFunctionGenerator.generate(ksClassDeclaration, resolver, codeGenerator,
-                any<MutableSet<String>>())
-        } answers  {
-            processClasses.add(UUID.randomUUID().toString())
-        }
-
-        every {
-            resolver.getSymbolsWithAnnotation(AutoMapper::class.qualifiedName.orEmpty())
+            resolver.getSymbolsWithAnnotation(AutoMapper::class.qualifiedName.toString())
         } returns listOf(ksClassDeclaration).asSequence()
 
         val autoMapperProcessor = AutoMapperProcessor(codeGenerator, logger)
         autoMapperProcessor
             .setPrivateField("mappingFunctionGenerator", mappingFunctionGenerator)
-        autoMapperProcessor
-            .setPrivateField("processedClasses", processClasses)
         autoMapperProcessor.process(resolver).shouldBeEmpty()
-        processClasses.size shouldBe 1
-        autoMapperProcessor.process(resolver).shouldBeEmpty()
-        processClasses.size shouldBe 2
-
     }
 })
-

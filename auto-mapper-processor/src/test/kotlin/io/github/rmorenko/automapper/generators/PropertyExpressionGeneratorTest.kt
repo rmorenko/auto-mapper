@@ -2,7 +2,6 @@ package io.github.rmorenko.automapper.generators
 
 import com.google.devtools.ksp.processing.KSPLogger
 import io.github.rmorenko.automapper.model.MappingInfo
-import io.github.rmorenko.automapper.generators.PropertyExpressionGenerator
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk

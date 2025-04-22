@@ -75,8 +75,8 @@ Then configure the kotlin-maven-plugin to use the ksp compiler plugin:
 
 ### Defining a mapper
 #### Simple case
-For generating mapping function just add annotation @AutoMapper to source class and set to target 
-property class of target class. If classes have the same properties it will be enough.
+For generating mapping function just add annotation @AutoMapper to source class and set to _target_
+argument target class. If classes have the same properties it will be enough.
 
 ```kotlin
 package com.example.entity
@@ -510,6 +510,177 @@ public fun Error.mapErrorToErrorDto(): ErrorDto = ErrorDto(
 ```
 In _ErrorMapper.kt_ generated nested mapping function
 
+### Generating target class
+In release _1.0.2_ was added new feature - generating target classes. It is useful when
+you need generate class with mostly the same properties. In simple case just add _GenerateTarget_
+annotation with name of generated class in _name_ argument:
 
+```kotlin
+package com.example.entity
+
+import io.github.rmorenko.automapper.annotations.GenerateTarget
+
+@GenerateTarget(name = "SimplePersonDto")
+data class SimplePerson(
+val name: String,
+val age: Int
+)
+```
+Generated class will be in same package source class
+```kotlin
+package com.example.entity
+
+import kotlin.Int
+import kotlin.String
+
+public data class SimplePersonDto(
+public val name: String,
+public val age: Int,
+)
+```
+#### GenerateTarget, set package name.
+For declare package name you can use _pkg_ argument in _GenerateTarget_
+```kotlin
+package com.example.entity
+
+import io.github.rmorenko.automapper.annotations.GenerateTarget
+
+@GenerateTarget(pkg = "com.example.dto", name = "SimplePersonDto")
+data class SimplePerson(
+val name: String,
+val age: Int
+)
+```
+The result will be
+```kotlin
+package com.example.dto
+
+import kotlin.Int
+import kotlin.String
+
+public data class SimplePersonDto(
+  public val name: String,
+  public val age: Int,
+)
+```
+
+#### GenerateTarget, add additional properties.
+To add additional properties to generated target class use _props_ argument in _GenerateTarget_
+annotation. _Props_ argument is the list of _AddTargetProperty_ with three arguments
+* name - name of property, required
+* pkg - package of property type, not required (if pkg is not set takes package name from source class)
+* className - class name of property type, required
+```kotlin
+package com.example.entity
+
+import io.github.rmorenko.automapper.annotations.AddTargetProperty
+import io.github.rmorenko.automapper.annotations.GenerateTarget
+
+@GenerateTarget(pkg = "com.example.dto",
+    props = [AddTargetProperty(name = "surname", pkg = "kotlin", className = "String")],
+    name = "SimplePersonDto")
+
+data class SimplePerson(
+    val name: String,
+    val age: Int
+)
+
+```
+Result will be:
+```kotlin
+package com.example.dto
+
+import kotlin.Int
+import kotlin.String
+
+public data class SimplePersonDto(
+  public val name: String,
+  public val age: Int,
+  public val surname: String,
+)
+```
+#### GenerateTarget, how to exclude properties in generated class
+For excluding properties in generated target class you can use _TargetPropertyExclude_ 
+annotation on property which you want to exclude.
+```kotlin
+package com.example.entity
+
+import io.github.rmorenko.automapper.annotations.AddTargetProperty
+import io.github.rmorenko.automapper.annotations.GenerateTarget
+import io.github.rmorenko.automapper.annotations.TargetPropertyExclude
+
+@GenerateTarget(pkg = "com.example.dto",
+    props = [AddTargetProperty(name = "surname", pkg = "kotlin", className = "String")],
+    name = "SimplePersonDto")
+
+data class SimplePerson(
+    val name: String,
+    val age: Int,
+    @TargetPropertyExclude
+    val child: SimplePerson
+)
+```
+Property _child_ will exclude from generated class:
+```kotlin
+package com.example.dto
+
+import kotlin.Int
+import kotlin.String
+
+public data class SimplePersonDto(
+  public val name: String,
+  public val age: Int,
+  public val surname: String,
+)
+```
+#### GenerateTarget, how to customize property types in generated classes
+For changing property type in generating class yoy can use _GenerateTargetPropertyType_
+annotation on properties which type you want to set. Annotation _GenerateTargetPropertyType_ has
+two arguments _pkg_ and _className_. Argument _pkg_ is not required, if it is not set package name 
+will take from source class.
+
+```kotlin
+package com.example.entity
+
+import com.example.address.Address
+import io.github.rmorenko.automapper.annotations.AddTargetProperty
+import io.github.rmorenko.automapper.annotations.GenerateTarget
+import io.github.rmorenko.automapper.annotations.GenerateTargetPropertyType
+import io.github.rmorenko.automapper.annotations.TargetPropertyExclude
+
+@GenerateTarget(pkg = "com.example", name = "PersonDto",
+props = [AddTargetProperty(name = "add", pkg = "kotlin", className = "String")])
+data class Person(val name: String,
+@TargetPropertyExclude
+val age: Int,
+@GenerateTargetPropertyType(pkg = "com.example.address", className = "AddressDto")
+val address: Address
+)
+```
+Nested class declaration: 
+```kotlin
+package com.example.address
+
+import kotlin.String
+
+public data class AddressDto(
+public val city: String,
+public val country: String,
+)
+```
+Result:
+```kotlin
+package com.example
+
+import com.example.address.AddressDto
+import kotlin.String
+
+public data class PersonDto(
+  public val name: String,
+  public val address: AddressDto,
+  public val add: String,
+)
+
+```
 ## API documentation for last release
 [KDoc ](https://rmorenko.github.io/auto-mapper/)

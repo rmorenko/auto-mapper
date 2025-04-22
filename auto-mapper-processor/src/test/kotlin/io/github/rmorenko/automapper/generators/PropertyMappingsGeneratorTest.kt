@@ -57,6 +57,8 @@ class PropertyMappingsGeneratorTest : StringSpec({
         val annotation = mockk<KSAnnotation>{
             every { shortName.asString() } returns AutoMapper::class.simpleName.toString()
             every { arguments } returns listOf(argument)
+            every { annotationType.resolve().declaration.qualifiedName?.asString()
+            } returns AutoMapper::class.qualifiedName.toString()
         }
 
 
@@ -64,6 +66,8 @@ class PropertyMappingsGeneratorTest : StringSpec({
             every { annotations } returns listOf(
                 mockk<KSAnnotation>{
                     every { shortName.asString() } returns AutoMapper::class.simpleName.toString()
+                    every { annotationType.resolve().declaration.qualifiedName?.asString()
+                    } returns AutoMapper::class.qualifiedName.toString()
                     every { arguments } returns listOf(
                         mockk<KSValueArgument>{
                             every { name?.getShortName() } returns "target"

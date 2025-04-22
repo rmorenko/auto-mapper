@@ -4,7 +4,7 @@ import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import io.github.rmorenko.automapper.annotations.AutoMapper
-import io.github.rmorenko.automapper.getAnnotation
+import io.github.rmorenko.automapper.getFirstAnnotation
 import io.github.rmorenko.automapper.getAnnotationArgumentValue
 import io.github.rmorenko.automapper.model.AutoMapperInfo
 import io.github.rmorenko.automapper.model.DefaultInfo
@@ -33,7 +33,7 @@ class PropertyMappingsGenerator(private val logger: KSPLogger) {
         autoMapperInfo: AutoMapperInfo,
     ): String {
         val targetProperties = getTargetProperties(classDeclaration)
-        logger.info("Target class properties:  $targetProperties")
+        logger.info("Target class properties for $targetProperties")
         return classDeclaration.getAllProperties()
             .filter { prop ->
                 prop.simpleName.asString() !in autoMapperInfo.excludes
@@ -45,7 +45,7 @@ class PropertyMappingsGenerator(private val logger: KSPLogger) {
 
                 val mappingInfo = mappings[propName]
                 val targetName = (propType.declaration as? KSClassDeclaration)?.let { classDecl ->
-                    val mappedType = classDecl.getAnnotation(AutoMapper::class)?.arguments
+                    val mappedType = classDecl.getFirstAnnotation(AutoMapper::class)?.arguments
                         ?.getAnnotationArgumentValue<KSType>(
                             "target"
                         )
@@ -76,7 +76,11 @@ class PropertyMappingsGenerator(private val logger: KSPLogger) {
                 it.shortName.asString() == AutoMapper::class.simpleName.toString()
             }?.arguments?.first {
                 it.name?.asString() == "target"
-            }?.value as? KSType ?: return emptySet()
+            }?.value as? KSType
+
+        if (type == null) {
+            return classDeclaration.getAllProperties().map { it.simpleName.asString() }.toSet()
+        }
 
         return (type.declaration as KSClassDeclaration).getAllProperties()
             .map { it.simpleName.asString() }
