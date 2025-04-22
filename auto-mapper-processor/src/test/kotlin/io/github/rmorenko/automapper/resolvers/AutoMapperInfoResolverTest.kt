@@ -114,6 +114,10 @@ class AutoMapperInfoResolverTest : StringSpec({
         } returns annotationSimpleName
 
         every {
+            classDeclaration.qualifiedName?.asString()
+        } returns "com.example.SourceClass"
+
+        every {
             classDeclaration.annotations
         } returns listOf(autoMapperAnnotation).asSequence()
 
@@ -182,6 +186,10 @@ class AutoMapperInfoResolverTest : StringSpec({
         } returns annotationFullName
 
         every {
+            classDeclaration.qualifiedName?.asString()
+        } returns "com.example.SourceClass"
+
+        every {
             classDeclaration.annotations
         } returns listOf(autoMapperAnnotation).asSequence()
 
@@ -281,275 +289,6 @@ class AutoMapperInfoResolverTest : StringSpec({
         actualAdditionalInfo.defaults.first().target shouldBe "otherProperty"
     }
 
-
-    "resolve should return correct AutoMapperInfo without target argument" {
-        val autoMapperInfoResolver = AutoMapperInfoResolver(logger)
-        val resolver = mockk<Resolver>()
-        val classDeclaration = mockk<KSClassDeclaration>()
-        val autoMapperAnnotation = mockk<KSAnnotation>()
-        val autoMapperAnnotationKSName = mockk<KSName>()
-        val fullAutoMapperAnnotationKSName = mockk<KSName>()
-
-        every {
-            autoMapperAnnotation.shortName
-        } returns autoMapperAnnotationKSName
-
-        every {
-            autoMapperAnnotationKSName.asString()
-        } returns annotationSimpleName
-
-        every {
-            autoMapperAnnotation.annotationType.resolve().declaration.qualifiedName
-        } returns fullAutoMapperAnnotationKSName
-
-        every {
-            fullAutoMapperAnnotationKSName.asString()
-        } returns annotationFullName
-
-        every {
-            autoMapperAnnotation.annotationType.resolve().declaration.qualifiedName
-        } returns fullAutoMapperAnnotationKSName
-
-        every {
-            fullAutoMapperAnnotationKSName.asString()
-        } returns annotationFullName
-
-        every {
-            classDeclaration.annotations
-        } returns listOf(autoMapperAnnotation).asSequence()
-
-        val autoMapperTargetArgumentName = mockk<KSName>{
-            every { asString() } returns "target"
-            every { getShortName() } returns "target"
-        }
-
-        val targetNameArgumentName = mockk<KSName>{
-            every { asString() } returns "targetName"
-            every { getShortName() } returns "targetName"
-        }
-
-        val targetPkgArgumentName = mockk<KSName>{
-            every { asString() } returns "targetPkg"
-            every { getShortName() } returns "targetPkg"
-        }
-
-
-        val autoMapperDefaultsArgumentName = mockk<KSName>{
-            every { asString() } returns "defaults"
-            every { getShortName() } returns "defaults"
-        }
-
-        val autoMapperImportsArgumentName = mockk<KSName>{
-            every { asString() } returns "imports"
-            every { getShortName() } returns "imports"
-        }
-
-        val autoMapperExcludeArgumentName = mockk<KSName>{
-            every { asString() } returns "exclude"
-            every { getShortName() } returns "exclude"
-        }
-
-        val autoMapperTargetKSType = mockk<KSType>{
-            every { declaration.packageName.asString() } returns "kotlin"
-            every { declaration.simpleName.asString() } returns "Unit"
-            every { declaration.qualifiedName?.asString() } returns "kotlin.Unit"
-        }
-
-        val defaultKSName = mockk<KSName>{
-            every { asString() } returns "defaults"
-        }
-
-        val defaultTargetArgumentName = mockk<KSName>{
-            every { asString() } returns "target"
-            every { getShortName() } returns "target"
-        }
-
-        val defaultCodeArgumentName = mockk<KSName>{
-            every { asString() } returns "code"
-            every { getShortName() } returns "code"
-        }
-
-        val defaultAnnotationsArguments = listOf(
-            mockk<KSValueArgument>{
-                every { name } returns defaultTargetArgumentName
-                every { value } returns "otherProperty"
-            },
-            mockk<KSValueArgument>{
-                every { name } returns defaultCodeArgumentName
-                every { value } returns "default code"
-            }
-        )
-
-        val defaultAnnotations = listOf(
-            mockk<KSAnnotation>{
-                every { shortName } returns defaultKSName
-                every { arguments } returns defaultAnnotationsArguments
-            }
-        )
-
-        val autoMapperAnnotationArguments = listOf(
-            mockk<KSValueArgument>{
-                every { name } returns autoMapperTargetArgumentName
-                every { value } returns autoMapperTargetKSType
-            },
-
-            mockk<KSValueArgument>{
-                every { name } returns targetNameArgumentName
-                every { value } returns "TargetClass"
-            },
-
-            mockk<KSValueArgument>{
-                every { name } returns targetPkgArgumentName
-                every { value } returns "com.example"
-            },
-
-            mockk<KSValueArgument>{
-                every { name } returns autoMapperDefaultsArgumentName
-                every { value } returns ArrayList(defaultAnnotations)
-            },
-
-            mockk<KSValueArgument>{
-                every { name } returns autoMapperImportsArgumentName
-                every { value } returns ArrayList(listOf("com.import.a", "com.import.b"))
-            },
-
-            mockk<KSValueArgument>{
-                every { name } returns autoMapperExcludeArgumentName
-                every { value } returns ArrayList(listOf("excludeA", "excludeB"))
-            }
-        )
-
-        every {
-            autoMapperAnnotation.arguments
-        } returns autoMapperAnnotationArguments
-
-        every {
-            resolver.getSymbolsWithAnnotation(Mapping::class.simpleName.toString())
-        } returns emptyList<KSClassDeclaration>().asSequence()
-
-        val actualAdditionalInfo = autoMapperInfoResolver.resolve(classDeclaration)
-        actualAdditionalInfo.targetPackage shouldBe "com.example"
-        actualAdditionalInfo.targetName shouldBe "TargetClass"
-        actualAdditionalInfo.excludes shouldBe listOf("excludeA", "excludeB")
-        actualAdditionalInfo.additionalImports shouldBe listOf("com.import.a", "com.import.b")
-        actualAdditionalInfo.defaults.size shouldBe 1
-        actualAdditionalInfo.defaults.first().code shouldBe "default code"
-        actualAdditionalInfo.defaults.first().target shouldBe "otherProperty"
-    }
-
-
-    "resolve should return correct AutoMapperInfo when target is empty in default" {
-        val autoMapperInfoResolver = AutoMapperInfoResolver(logger)
-        val resolver = mockk<Resolver>()
-        val classDeclaration = mockk<KSClassDeclaration>()
-        val autoMapperAnnotation = mockk<KSAnnotation>()
-        val autoMapperAnnotationKSName = mockk<KSName>()
-        val fullAutoMapperAnnotationKSName = mockk<KSName>()
-
-        every {
-            autoMapperAnnotation.shortName
-        } returns autoMapperAnnotationKSName
-
-        every {
-            autoMapperAnnotationKSName.asString()
-        } returns annotationSimpleName
-
-
-        every {
-            autoMapperAnnotation.annotationType.resolve().declaration.qualifiedName
-        } returns fullAutoMapperAnnotationKSName
-
-        every {
-            fullAutoMapperAnnotationKSName.asString()
-        } returns annotationFullName
-
-        every {
-            classDeclaration.annotations
-        } returns listOf(autoMapperAnnotation).asSequence()
-
-        val autoMapperTargetArgumentName = mockk<KSName>{
-            every { asString() } returns "target"
-            every { getShortName() } returns "target"
-        }
-        val autoMapperDefaultsArgumentName = mockk<KSName>{
-            every { asString() } returns "defaults"
-            every { getShortName() } returns "defaults"
-        }
-
-        val autoMapperTargetKSType = mockk<KSType>{
-            every { declaration.packageName.asString() } returns "com.example"
-            every { declaration.simpleName.asString() } returns "TargetClass"
-            every { declaration.qualifiedName?.asString() } returns "com.example.TargetClass"
-        }
-
-        val defaultKSName = mockk<KSName>{
-            every { asString() } returns "defaults"
-        }
-
-        val defaultTargetArgumentName = mockk<KSName>{
-            every { asString() } returns "target"
-            every { getShortName() } returns "target"
-        }
-
-        val defaultCodeArgumentName = mockk<KSName>{
-            every { asString() } returns "code"
-            every { getShortName() } returns "code"
-        }
-
-        val defaultAnnotationsArguments = listOf(
-            mockk<KSValueArgument>{
-                every { name } returns defaultTargetArgumentName
-                every { value } returns ""
-            },
-            mockk<KSValueArgument>{
-                every { name } returns defaultCodeArgumentName
-                every { value } returns "default code"
-            }
-        )
-
-        val defaultAnnotations = listOf(
-            mockk<KSAnnotation>{
-                every { shortName } returns defaultKSName
-                every { arguments } returns defaultAnnotationsArguments
-            }
-        )
-
-        val autoMapperAnnotationArguments = listOf(
-            mockk<KSValueArgument>{
-                every { name } returns autoMapperTargetArgumentName
-                every { value } returns autoMapperTargetKSType
-            },
-            mockk<KSValueArgument>{
-                every { name } returns autoMapperDefaultsArgumentName
-                every { value } returns ArrayList(defaultAnnotations)
-            }
-        )
-
-        every {
-            autoMapperAnnotation.arguments
-        } returns autoMapperAnnotationArguments
-
-        every {
-            resolver.getSymbolsWithAnnotation(Mapping::class.simpleName.toString())
-        } returns listOf(
-            mockk<KSClassDeclaration> {
-                every {
-                    packageName.asString()
-                } returns "com.example.target"
-
-                every {
-                    simpleName.asString()
-                } returns "TargetProperty"
-            }
-
-
-        ).asSequence()
-
-        val actualAdditionalInfo = autoMapperInfoResolver.resolve(classDeclaration)
-        actualAdditionalInfo.targetPackage shouldBe "com.example"
-        actualAdditionalInfo.targetName shouldBe "TargetClass"
-        actualAdditionalInfo.defaults.size shouldBe 0
-    }
 
     "resolve should return correct AutoMapperInfo when code is empty in default" {
         val autoMapperInfoResolver = AutoMapperInfoResolver(logger)
@@ -574,6 +313,10 @@ class AutoMapperInfoResolverTest : StringSpec({
         every {
             fullAutoMapperAnnotationKSName.asString()
         } returns annotationFullName
+
+        every {
+            classDeclaration.qualifiedName?.asString()
+        } returns "com.example.SourceClass"
 
         every {
             classDeclaration.annotations

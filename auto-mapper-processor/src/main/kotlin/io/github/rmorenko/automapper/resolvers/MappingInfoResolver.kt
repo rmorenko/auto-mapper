@@ -57,6 +57,8 @@ class MappingInfoResolver(private val logger: KSPLogger) {
                     isExtension = isExtension,
                     target = target
                 )
+            }.also {
+                logger.info("Mappings info for ${classDeclaration.qualifiedName?.asString()}: $it")
             }
     }
 }

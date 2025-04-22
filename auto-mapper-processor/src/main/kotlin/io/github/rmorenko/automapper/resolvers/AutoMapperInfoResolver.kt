@@ -16,14 +16,14 @@ import io.github.rmorenko.automapper.model.toDefaultInfo
 
 /**
  * Class responsible for resolving information from `@AutoMapper` annotation and
- * class declaration.
+ * class declaration to `AutoMapperInfo` instance.
  *
  * @property logger Logger for logging information during the resolution process.
  */
 class AutoMapperInfoResolver(private val logger: KSPLogger) {
 
     /**
-     * Resolves information from `@AutoMapper` annotation.
+     * Resolves information from `@AutoMapper` annotation and class declaration to `AutoMapperInfo` instance.
      * @param classDeclaration The class declaration to generate target class.
      * @return data from `@AutoMapper` annotation.
      */
@@ -33,7 +33,7 @@ class AutoMapperInfoResolver(private val logger: KSPLogger) {
             throw NoAnnotationArguments(AutoMapper::class)
         }
         logger.info("${AutoMapper::class.simpleName} arguments: $arguments")
-        val targetType = arguments.getAnnotationArgumentValue<KSType>("target")
+        val targetType = arguments.getRequiredAnnotationArgumentValue<KSType>("target")
         val defaults = arguments.getAnnotationArgumentValue<ArrayList<KSAnnotation>>("defaults")
             .orEmpty()
             .map(KSAnnotation::toDefaultInfo)
@@ -46,26 +46,15 @@ class AutoMapperInfoResolver(private val logger: KSPLogger) {
         logger.info("Additional imports: $additionalImports")
         val excludes = arguments.getAnnotationArgumentValue<ArrayList<String>>("exclude")?.toSet().orEmpty()
         logger.info("Excludes: $excludes")
-        val targetClassInfo = if (targetType!= null && targetType.declaration.qualifiedName?.asString()
-            != Unit::class.qualifiedName.toString()
-        ) {
-            targetType.declaration.packageName.asString() to targetType.declaration.simpleName.asString()
-        } else {
-            (arguments.getAnnotationArgumentValue<String>("targetPkg")?.ifEmpty {
-                classDeclaration.packageName.asString()
-            } ?: classDeclaration.packageName.asString()) to
-                    arguments.getRequiredAnnotationArgumentValue<String>("targetName")
-
-        }
-        val targetPackage = targetClassInfo.first
-        val targetName = targetClassInfo.second
         return AutoMapperInfo(
-            targetPackage = targetPackage,
-            targetName = targetName,
+            targetPackage = targetType.declaration.packageName.asString(),
+            targetName = targetType.declaration.simpleName.asString(),
             additionalImports = additionalImports,
             defaults = defaults,
             excludes = excludes
-        )
+        ).also {
+            logger.info("AutoMapperInfo for ${classDeclaration.qualifiedName?.asString()}: $it")
+        }
     }
 
     private fun getValidAnnotations(classDeclaration: KSClassDeclaration): List<KSAnnotation> {

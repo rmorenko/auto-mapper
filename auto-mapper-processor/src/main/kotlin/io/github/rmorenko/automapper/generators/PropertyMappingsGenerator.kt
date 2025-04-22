@@ -33,7 +33,7 @@ class PropertyMappingsGenerator(private val logger: KSPLogger) {
         autoMapperInfo: AutoMapperInfo,
     ): String {
         val targetProperties = getTargetProperties(classDeclaration)
-        logger.info("Target class properties:  $targetProperties")
+        logger.info("Target class properties for $targetProperties")
         return classDeclaration.getAllProperties()
             .filter { prop ->
                 prop.simpleName.asString() !in autoMapperInfo.excludes
@@ -76,7 +76,11 @@ class PropertyMappingsGenerator(private val logger: KSPLogger) {
                 it.shortName.asString() == AutoMapper::class.simpleName.toString()
             }?.arguments?.first {
                 it.name?.asString() == "target"
-            }?.value as? KSType ?: return emptySet()
+            }?.value as? KSType
+
+        if (type == null) {
+            return classDeclaration.getAllProperties().map { it.simpleName.asString() }.toSet()
+        }
 
         return (type.declaration as KSClassDeclaration).getAllProperties()
             .map { it.simpleName.asString() }

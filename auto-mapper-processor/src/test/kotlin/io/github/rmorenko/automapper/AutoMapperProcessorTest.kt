@@ -36,7 +36,7 @@ class AutoMapperProcessorTest : StringSpec({
     }
 
 
-    "mappingFunctionGenerator should execute when AutoMapper annotation resolved " {
+    "mappingFunctionGenerator should execute when AutoMapper annotation resolved" {
         val codeGenerator = mockk<CodeGenerator>()
         val resolver = mockk<Resolver>()
         val ksClassDeclaration = mockk<KSClassDeclaration>()
@@ -61,7 +61,5 @@ class AutoMapperProcessorTest : StringSpec({
         autoMapperProcessor
             .setPrivateField("mappingFunctionGenerator", mappingFunctionGenerator)
         autoMapperProcessor.process(resolver).shouldBeEmpty()
-
     }
 })
-
